@@ -1,0 +1,15 @@
+{
+  "name": "/\\Qloud Friend",
+  "type": "visualization",
+  "description": "Actions developers need in Qlik Sense Cloud",
+  "author": "Christof Schwarz",
+  "homepage": "https://github.com/ChristofSchwarz/db-ext-qloudfriend",
+  "version": "0.1.001",
+  "changehistory": {},
+  "icon": "group",
+  "dependencies": {
+    "qlik-sense": ">=3.0.x"
+  },
+  "keywords": "qlik-sense, visualization",
+  "license": "MIT"
+}
