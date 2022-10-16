@@ -260,29 +260,31 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                 const newTag = elem.target.innerText;
                 const sheetId = $(elem.target).parents('tr').attr('sheet');
                 const wasPublished = qlobal.sheetInfo[sheetId].published;
+                $(elem.target).css('opacity', '50%');
+                var cont = true;
                 if (wasPublished) {
                     // for a moment, unpublish the sheet
-                    await unpublishSheet(sheetId, qlobal);
+                    cont = await unpublishSheet(sheetId, qlobal);
                 }
-                if (await setSheetTag(sheetId, newTag, qlobal)) {
-                    $(`.qfr-settag`).css('display', 'none');
-                    if (wasPublished) {
+                if (cont) {
+                    if (await setSheetTag(sheetId, newTag, qlobal)) {
+                        $(elem.target).css('opacity', '');
+                        $(`.qfr-settag`).css('display', 'none');
+                        if (wasPublished) {
+                            // if it was published before, publish again
+                            await publishSheet(sheetId, qlobal);
+                        }
+                        $(`#qfr_tr_${sheetId} .qfr-col-tag`)
+                            .removeClass('qfr-tag- qfr-tag-private qfr-tag-public')
+                            .addClass(`qfr-tag-` + newTag)
+                            .find('a').html(newTag);
+                        setRightOrWrong(sheetId, newTag, $(`#qfr_cb_published_${sheetId}`).is(':checked'));
+                    } else if (wasPublished) {
                         // if it was published before, publish again
                         await publishSheet(sheetId, qlobal);
                     }
-                    $(`#qfr_tr_${sheetId} .qfr-col-tag`)
-                        .removeClass('qfr-tag- qfr-tag-private qfr-tag-public')
-                        .addClass(`qfr-tag-` + newTag)
-                        .find('a').html(newTag);
-                    setRightOrWrong(sheetId, newTag, $(`#qfr_cb_published_${sheetId}`).is(':checked'));
-                } else if (wasPublished) {
-                    // if it was published before, publish again
-                    await publishSheet(sheetId, qlobal);
                 }
             });
-
-            // freeze the width
-            // $('.qloudFriend-dialog').css('width', ($('.qloudFriend-dialog').width() * 1.1) + 'px');
 
             function showRows(all, warnings, own) {
                 $(`#${ownId}-tbody`).find('.qfr_sheetTableRow').each((i, elem) => {
@@ -506,8 +508,9 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
         catch (err) {
             leonardo.msg('qfr-error', 'Error setProperties',
                 JSON.stringify(err), null, 'Close', null, true);
+            ret = false;
         }
-        return true;
+        return ret;
     }
 
     function getAppInfo(appId) {

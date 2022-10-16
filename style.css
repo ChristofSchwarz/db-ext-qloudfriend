@@ -382,3 +382,7 @@
 .qloudFriend-dialog .lui-dialog__title {
   color: #47739d;
 }
+
+.lui-dialog--inverse .lui-dialog__title {
+  color: white;
+}

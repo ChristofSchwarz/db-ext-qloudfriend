@@ -4,7 +4,7 @@
   "description": "Actions developers need in Qlik Sense Cloud",
   "author": "Christof Schwarz",
   "homepage": "https://github.com/ChristofSchwarz/db-ext-qloudfriend",
-  "version": "0.1.002",
+  "version": "0.1.003",
   "changehistory": {},
   "icon": "group",
   "dependencies": {
