@@ -14,7 +14,7 @@
     "save_to_help": "put 'cloud' or 'win' or 'both'",
     "qlik_cli_location": "..\\..\\qlik.exe",
     "qlik_cli_location_help": "folder where qlik.exe is found, relative or absolute folder",
-    "qlik_cli_context": "branchenversicherung",
+    "qlik_cli_context": "databridge-internal.eu.qlikcloud.com",
     "qlik_cli_context_help": "the name of the qlik.exe context (cloud) which you want to use, see 'qlik.exe context ls'",
     "qrs_url": "https://qs-i-dev.databridge.ch:4242/qrs",
     "client_cert_location": "c:\\certificates\\qs-i-dev\\client.pfx",

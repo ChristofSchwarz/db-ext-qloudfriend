@@ -5,8 +5,8 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
     return {
 
         items: function (qext) {
-            var app = qlik.currApp();
-            var enigma = app.model.enigmaModel;
+            const app = qlik.currApp();
+            const enigma = app.model.enigmaModel;
             return [
                 {
                     uses: "settings"
@@ -27,9 +27,11 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                     type: 'items',
                     component: 'expandable-items',
                     items: [
-                        accordion_apikey(enigma),
+                        // accordion_apikey(enigma),
                         accordion_button1(),
-                        accordion_presentation()
+                        // accordion_button2(),
+                        // accordion_button3(),
+                        // accordion_presentation()
                     ]
                 }, {
                     label: 'About this extension',
@@ -40,55 +42,10 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
         }
     }
 
-    function accordion_apikey(enigma) {
-        return {
-            label: 'API Key',
-            type: 'items',
-            items: [{
-                label: 'API Key',
-                type: 'string',
-                expression: 'optional',
-                ref: 'pApiKey',
-                defaultValue: 'eyJhbGciOiJFUzM4NCIsImtpZCI6IjA5NWVlNWIyLTBhNGUtNDdkOS1iZDI0LWRmNTRkYzdkNWU0ZSIsInR5cCI6IkpXVCJ9'
-                    + '.eyJzdWJUeXBlIjoidXNlciIsInRlbmFudElkIjoiREU4UmkwRE0zb0dLa01rTHhKUGcyenV5UHhTdWpteEYiLCJqdGkiOiIwOTVlZTViMi0'
-                    + 'wYTRlLTQ3ZDktYmQyNC1kZjU0ZGM3ZDVlNGUiLCJhdWQiOiJxbGlrLmFwaSIsImlzcyI6InFsaWsuYXBpL2FwaS1rZXlzIiwic3ViIjoiNjJ'
-                    + 'jZWMwMTkxNjBhNmFmMDMzN2YyOGRhIn0.lwZc7AUBZOEUXxqJ9XJ8mKh5d0Z3eyT88hrjguIjzP4l2ciVMEnA87VF5g5dvWQbZj8sJF-Y_ro'
-                    + 'vEvbtjFibhFikVhNAlvCy_pvZc5ZX_mC13UV_W5Z1PZpc1FsncQ9m'
-            }, {
-                label: 'Test API Key',
-                component: 'button',
-                action: async function (arg) {
-                    var apiKey
-                    if (arg.pApiKey.qStringExpression) {
-                        // console.log('evaluate', arg.pApiKey.qStringExpression.qExpr);
-                        apiKey = await enigma.evaluate(arg.pApiKey.qStringExpression.qExpr);
-                    } else {
-                        // console.log('apiKey', arg.pApiKey);
-                        apiKey = arg.pApiKey;
-                    };
-                    $.ajax({
-                        url: '/api/v1/users/me',
-                        method: 'GET',
-                        headers: {
-                            "Authorization": "Bearer " + arg.pApiKey
-                        },
-                        dataType: 'json',
-                        async: false,  // wait for this call to finish.
-                        success: function (data) {
-                            leonardo.msg(arg.qInfo.qId, "Info", apiKey + '<br/><br/>' + JSON.stringify(data), null, 'Close');
-                            console.log(data);
-                        }
-                    })
-                }
-            }]
-        }
-    }
-    /*
-                        ,
-    */
+
     function accordion_button1() {   // ---------- reload ----------
         return {
-            label: 'Button Reload',
+            label: 'Button "Reload App"',
             type: 'items',
             items: [{
                 type: "boolean",
@@ -122,7 +79,7 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                 ref: 'pTaskId',
                 expression: 'optional',
                 show: function (data) { return data.pUseBtn1 && !data.pReloadOwn }
-            },*/ {
+            }, {
                 label: 'Hide within published apps',
                 type: 'boolean',
                 ref: 'pCBhideIfPublic',
@@ -159,6 +116,83 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                 type: "object",
                 defaultValue: "#ffffff",
                 show: function (data) { return data.pUseBtn1 }
+            }*/]
+        }
+    }
+
+    function accordion_button2() {   // ---------- publish sheet ----------
+        return {
+            label: 'Button 2) Sheet Checkout',
+            type: 'items',
+            items: [{
+                type: "boolean",
+                defaultValue: true,
+                ref: "pUseBtn2",
+                label: "Use Button"
+            }, {
+                label: 'Button Label Checkout',
+                type: 'string',
+                expression: 'optional',
+                ref: 'pBtnLabel2_unpublish',
+                defaultValue: 'Checkout Sheet',
+                show: function (data) { return data.pUseBtn2 }
+            }, {
+                label: 'Button Label Check-in',
+                type: 'string',
+                expression: 'optional',
+                ref: 'pBtnLabel2_publish',
+                defaultValue: 'Publish Sheet',
+                show: function (data) { return data.pUseBtn2 }
+            }, {
+                label: "Text color",
+                component: "color-picker",
+                ref: "pTxtColor2",
+                type: "object",
+                //dualOutput: true,
+                defaultValue: "#333333",
+                show: function (data) { return data.pUseBtn2 }
+            }, {
+                label: "Background color",
+                component: "color-picker",
+                ref: "pBgColor2",
+                type: "object",
+                defaultValue: "#ffffff",
+                show: function (data) { return data.pUseBtn2 }
+            }]
+        }
+    }
+
+    function accordion_button3() {   // ---------- publish app ----------
+        return {
+            label: 'Button 3) Publish App',
+            type: 'items',
+            items: [{
+                type: "boolean",
+                defaultValue: true,
+                ref: "pUseBtn3",
+                label: "Use Button"
+            }, {
+                label: 'Button Label',
+                type: 'string',
+                expression: 'optional',
+                ref: 'pBtnLabel3',
+                defaultValue: 'Publish App',
+                show: function (data) { return data.pUseBtn3 }
+            }, {
+                label: "Text color",
+                component: "color-picker",
+                ref: "pTxtColor3",
+                type: "object",
+                //dualOutput: true,
+                defaultValue: "#333333",
+                show: function (data) { return data.pUseBtn3 }
+            }, {
+                label: "Background color",
+                component: "color-picker",
+                ref: "pBgColor3",
+                type: "object",
+                defaultValue: "#ffffff",
+                show: function (data) { return data.pUseBtn3 }
             }]
         }
     }

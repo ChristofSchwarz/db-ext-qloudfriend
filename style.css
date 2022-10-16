@@ -1,28 +1,28 @@
 .qv-object-qloudFriend div.qv-object-content-container {
-	/*overflow: auto;*/
-	text-align: center;
+  /*overflow: auto;*/
+  text-align: center;
 }
 
 .qv-object-qloudFriend button {
-	/*width: 100%; width comes from style parameter in button tag (dyn. setting of extension) */
-	margin-left: 1px;
-	margin-right: 1px;
+  /*width: 100%; width comes from style parameter in button tag (dyn. setting of extension) */
+  margin-left: 1px;
+  margin-right: 1px;
 }
 
 .qloudFriend-welcome {
-	font-size: 6.5pt;
-    color: #aaa;
-	position: absolute; 
-    bottom: 0px; 
-	right: 0px;
+  font-size: 6.5pt;
+  color: #aaa;
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
 }
 
 .qloudFriend-true {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 4px;
-  padding: 0;
+  /* margin-bottom: 4px; */
+  padding: 0 5px;
 }
 
 .qloudFriend-false {
@@ -36,37 +36,349 @@
   left: calc(50% - 200px);
 }
 
-.qloudFriend-rotate {
-    animation-name: rotate;
-    animation-duration: 1.5s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-    transform: rotate(1turn);
-    -webkit-animation-name: rotate;
-    -webkit-animation-duration: 1.5s;
-    -webkit-animation-iteration-count: infinite;
-    -webkit-animation-timing-function: linear;
-    -webkit-transform: rotate(1turn);
+.qloudFriend-dialog .lui-dialog__header {
+  padding: 8px 0 8px 8px;
 }
 
-.qloudFriend-spinner {
-	height:60px;
-	width:60px;
-	margin:0 auto;
-    background-image: url(../extensions/qloudFriend/loader.svg);
-    background-size: 100% 100%;
-    animation-name: rotate;
-    animation-duration: 1.5s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-    transform: rotate(1turn);
-    -webkit-animation-name: rotate;
-    -webkit-animation-duration: 1.5s;
-    -webkit-animation-iteration-count: infinite;
-    -webkit-animation-timing-function: linear;
-    -webkit-transform: rotate(1turn);
+.qloudFriend-dialog .lui-dialog__body div {
+  margin-bottom: 10px;
+}
+
+.qloudFriend-dialog th {
+  text-align: left;
+}
+
+.qloudFriend-rotate {
+  width: 60px;
+  margin-left: calc(50% - 30px);
+  vertical-align: middle;
+  text-align: center;
+  animation-name: rotate;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  transform: rotate(1turn);
+  -webkit-animation-name: rotate;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+  -webkit-transform: rotate(1turn);
+}
+
+.qloudFriend-rotate .lui-icon--reload {
+  font-size: xxx-large;
+  color: lightgray;
+}
+
+.qloudFriend-spin {
+  animation-name: rotate;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  transform: rotate(1turn);
+  -webkit-animation-name: rotate;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+  -webkit-transform: rotate(1turn);
 }
 
 .lui-dialog {
-	font-family: Source Sans Pro,sans-serif;
+  font-family: Source Sans Pro, sans-serif;
+}
+
+.qloudFriend-sheetTable td:nth-of-type(3),
+.qloudFriend-sheetTable td:nth-of-type(4),
+.qloudFriend-sheetTable td:nth-of-type(5) {
+  text-align: center;
+}
+.qloudFriend-sheetTable th {
+  position: sticky;
+  top: 0;
+  vertical-align: middle;
+}
+
+.qloudFriend-sheetTable tr {
+  height: 18pt;
+}
+
+.qloudFriend-sheetTable th:nth-of-type(1) {
+  width: 20px;
+}
+
+.qloudFriend-sheetTable th:nth-of-type(3) {
+  width: 65px;
+  text-align: center;
+}
+.qloudFriend-sheetTable th:nth-of-type(4),
+.qloudFriend-sheetTable th:nth-of-type(5) {
+  width: 80px;
+  text-align: center;
+}
+
+.qloudFriend-sheetTable th {
+  background-color: #f8f8f8;
+}
+
+.qloudFriend-sheetTable a {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.qloudFriend-toolbar-button {
+  background-color: #092c4f;
+  color: #ffcd00;
+  min-width: unset;
+  width: 40px;
+  border-left: 1px solid #f2f2f2;
+  padding: 0;
+}
+
+.databridge_logo {
+  background: url("../extensions/db-ext-qloudfriend/pics/db-logo.png");
+  width: 65px;
+  height: 65px;
+  background-size: 63%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.qfr-managedSpaceIcon svg {
+  background-color: rgb(220, 66, 63);
+  color: white;
+  border: 2px solid rgb(220, 66, 63);
+  border-radius: 4px;
+}
+
+.qfr-sharedSpaceIcon svg {
+  background-color: rgb(0, 92, 185);
+  color: white;
+  border: 2px solid rgb(0, 92, 185);
+  border-radius: 4px;
+}
+
+.qfr-personalSpaceIcon svg {
+  background-color: rgb(204, 204, 204);
+  color: rgb(64, 64, 64);
+  border: 2px solid rgb(204, 204, 204);
+  border-radius: 4px;
+}
+
+.qfr-dataOptions label {
+  margin-top: -3pt;
+}
+
+.qfr-dataOptions label:nth-of-type(1) {
+  margin-top: 6pt !important;
+}
+/*
+.qfr-cb-right {
+  border: 3px dashed green;
+  border-radius: 6px;
+}
+*/
+
+.qfr-cb-wrong {
+  border: 2px dashed red;
+  border-radius: 6px;
+}
+
+.qfr-tag-private .qfr-roundbox,
+.qfr-tag-public .qfr-roundbox,
+.qfr-span-public,
+.qfr-span-private {
+  border: 1px solid lightgray;
+  border-radius: 10px;
+  padding: 0 5px 0 5px;
+  font-size: smaller;
+  text-decoration: none;
+}
+
+.qfr-tag-private .qfr-roundbox,
+.qfr-span-private {
+  background: orange;
+  color: white;
+}
+
+.qfr-tag-public .qfr-roundbox,
+.qfr-span-public {
+  background: gray;
+  color: white;
+}
+
+.qfr-span-public,
+.qfr-span-private {
+  cursor: pointer;
+}
+
+.qfr_sheetTableRow td {
+  padding-top: 1px;
+}
+
+.qfr-th-sort {
+  cursor: pointer;
+}
+
+#qfr-show-all,
+#qfr-show-warnings,
+#qfr-show-own {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#qfr-spaceinfo {
+  margin-top: 20px;
+  display: flex;
+  margin-bottom: unset;
+}
+
+#qfr-spaceinfo div {
+  margin-bottom: unset;
+  margin-right: 7px;
+}
+
+#qfr-spaceinfo .lui-icon--warning-triangle {
+  color: #f69c43;
+}
+
+.qfr-tablefilter {
+  display: flex;
+}
+
+.qfr-tablefilter label {
+  margin-left: 20px;
+}
+
+.qfr-tablefilter .lui-checkbox__check {
+  height: 18px;
+  width: 18px;
+}
+
+.qfr-settag {
+  position: absolute;
+  margin-left: 12px;
+}
+
+.qfr-settag .lui-icon--close {
+  cursor: pointer;
+  color: #aaa;
+}
+
+.qfr-tag-public .qfr-span-public,
+.qfr-tag-private .qfr-span-private {
+  display: none;
+}
+
+.qfr-counter-alert {
+  background-color: rgb(203, 91, 91);
+  color: white;
+  border-radius: 7px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.qfr-counter-normal {
+  background-color: rgb(169, 169, 169);
+  color: white;
+  border-radius: 7px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.qfr-tooltip__arrow {
+  position: absolute;
+}
+.qfr-tooltip__arrow:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.qfr-tooltip__arrow--left {
+  left: 0;
+  top: 50%;
+}
+.qfr-tooltip__arrow--left:after {
+  top: -8px;
+  right: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid rgba(0, 0, 0, 0.9);
+}
+.qfr-tooltip__arrow--right {
+  right: 0;
+  top: 50%;
+}
+.qfr-tooltip__arrow--right:after {
+  top: -8px;
+  left: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid rgba(0, 0, 0, 0.9);
+}
+.qfr-tooltip__arrow--top {
+  top: 0;
+  left: 50%;
+}
+.qfr-tooltip__arrow--top:after {
+  left: -8px;
+  bottom: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid rgba(0, 0, 0, 0.9);
+}
+.qfr-tooltip__arrow--bottom {
+  bottom: 0;
+  left: 50%;
+}
+.qfr-tooltip__arrow--bottom:after {
+  left: -8px;
+  top: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(0, 0, 0, 0.9);
+}
+.qfr-tooltip {
+  min-height: 28px;
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 13px;
+  position: absolute;
+  transition: opacity 50ms ease-out;
+  opacity: 1;
+  z-index: 1021;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+.qfr-tooltip.lui-fade {
+  opacity: 0;
+}
+
+.qfr-databridge-title-img {
+  float: left;
+  width: 130px;
+  border-right: 10px solid #00000000;
+}
+
+.qfr-db-button-on-sheet {
+  padding: 0;
+  background-color: #092c4f;
+}
+
+.qfr-db-button-on-sheet img {
+  width: 23px;
+}
+
+.qfr-semitransparent {
+  opacity: 40%;
+}
+
+.qfr-version {
+  color: #fdcb00;
+}
+
+.qloudFriend-dialog .lui-dialog__title {
+  color: #47739d;
 }
