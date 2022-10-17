@@ -1,20 +1,12 @@
 // common functions needed in qloudFriend extension ...
 
-define(["./leonardo"], function (leonardo) {
+define(["qlik", "jquery", "./leonardo"], function
+    (qlik, $, leonardo) {
 
     return {
 
         getCloudHttpHeaders: function () {
-            var csrfToken = document.cookie.split(';').filter(e => e.indexOf('_csrfToken=') > -1)[0] || '';
-            // console.log('csrfToken', csrfToken);
-            var httpHeaders = {};
-            if (csrfToken) {
-                csrfToken = csrfToken.split('=')[1];
-                httpHeaders["qlik-csrf-token"] = csrfToken;
-            } else {
-                console.warning('no _csrfToken found within Qlik Cloud cookies.');
-            }
-            return httpHeaders;
+            return getCloudHttpHeaders();
         },
 
         getSpaceIcon: function (type, tag = 'span') {
@@ -37,15 +29,113 @@ define(["./leonardo"], function (leonardo) {
         },
 
         showApiError: function (err) {
-            console.error(err);
-            leonardo.msg('qfr-error', `<span class="lui-icon  lui-icon--warning"></span> Error ${err.status}`,
-                `<div>
-                ${err.responseJSON ?
-                    (error.responseJSON.errors ? JSON.stringify(err.responseJSON.errors[0]) : err.responseText)
-                    : err.statusText
+            showApiError(err)
+        },
+
+        getQlobalInfo: function (qlobal) {
+            // gets info about app and stores it into qlobal.appInfo, qlobal.userInfo
+            // qlobal.ownerInfo, qlobal.spaceInfo, and qlobal.childApps
+            console.log('Getting info about user, app, and space.');
+            return new Promise((resolve, reject) => {
+
+                const app = qlik.currApp();
+                var httpHeaders = getCloudHttpHeaders();
+
+                $.ajax({
+                    url: `/api/v1/users/me`,
+                    dataType: 'json',
+                    method: 'GET',
+                    headers: httpHeaders,
+                    async: false,  // wait for this call to finish.
+                    success: function (res) { qlobal.userInfo = res; },
+                    error: function (err) { showApiError(err); reject(err); }
+                });
+
+                $.ajax({
+                    url: `/api/v1/apps/${app.id}`,
+                    dataType: 'json',
+                    method: 'GET',
+                    headers: httpHeaders,
+                    async: false,  // wait for this call to finish.
+                    success: function (res) { qlobal.appInfo = res; },
+                    error: function (err) { showApiError(err); reject(err); }
+                });
+                // console.log('this app', appInfo);
+
+                $.ajax({
+                    url: `/api/v1/users/${qlobal.appInfo.attributes.ownerId}`,
+                    dataType: 'json',
+                    method: 'GET',
+                    headers: httpHeaders,
+                    async: false,  // wait for this call to finish.
+                    success: function (res) { qlobal.ownerInfo = res; },
+                    error: function (err) { showApiError(err); reject(err); }
+                });
+                // console.log('Owner of app', ownerInfo);
+
+                if (qlobal.appInfo.attributes.spaceId) {
+                    $.ajax({
+                        url: `/api/v1/spaces/${qlobal.appInfo.attributes.spaceId}`,
+                        dataType: 'json',
+                        method: 'GET',
+                        headers: httpHeaders,
+                        async: false,  // wait for this call to finish.
+                        success: function (res) { qlobal.spaceInfo = res; },
+                        error: function (err) { showApiError(err); reject(err); }
+                    })
+                } else {
+                    qlobal.spaceInfo = null;
                 }
-            </div>`
-                , null, 'Close', null, true);
+
+                qlobal.childApps = [];
+                var loop = 0;
+                var url = `/api/v1/items?resourceType=app&limit=99`;
+                while (url) {
+                    loop++;
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        method: 'GET',
+                        headers: httpHeaders,
+                        async: false,  // wait for this call to finish.
+                        success: function (res) {
+                            const filteredApps = res.data.filter(e => {
+                                return e.resourceAttributes ? (e.resourceAttributes.originAppId == app.id) : false
+                            });
+                            qlobal.childApps.push(...filteredApps);
+                            url = res.links.next ? res.links.next.href : false;
+                        }
+                    })
+                }
+
+                console.log('qlobal updated', qlobal);
+                resolve(true);
+            })
         }
     };
+
+    function getCloudHttpHeaders() {
+        var csrfToken = document.cookie.split(';').filter(e => e.indexOf('_csrfToken=') > -1)[0] || '';
+        // console.log('csrfToken', csrfToken);
+        var httpHeaders = {};
+        if (csrfToken) {
+            csrfToken = csrfToken.split('=')[1];
+            httpHeaders["qlik-csrf-token"] = csrfToken;
+        } else {
+            console.warning('no _csrfToken found within Qlik Cloud cookies.');
+        }
+        return httpHeaders;
+    }
+
+    function showApiError(err) {
+        console.error(err);
+        leonardo.msg('qfr-error', `<span class="lui-icon  lui-icon--warning"></span> Error ${err.status}`,
+            `<div>
+            ${err.responseJSON ?
+                (error.responseJSON.errors ? JSON.stringify(err.responseJSON.errors[0]) : err.responseText)
+                : err.statusText
+            }
+        </div>`
+            , null, 'Close', null, true);
+    }
 });

@@ -1,13 +1,19 @@
-define(["qlik", "jquery", "text!./style.css", "./props", "./leonardo",
-    "./buttons/1", "./buttons/2", "text!./pics/db-logo.png"], function
-    (qlik, $, cssContent, props, leonardo, button1, button2, dblogo) {
+define(["qlik", "jquery", "text!./style.css", "./props", "./functions",
+    "./buttons/1", "./friend"], function
+    (qlik, $, cssContent, props, functions, button1, friend) {
 
     'use strict';
 
+    // Initializing global object "qlobal"
     var qlobal = {
         qext: null,
         title: 'Qloud Friend Extension',
-        sheetInfo: {}
+        sheetInfo: {},
+        appInfo: null,
+        spaceInfo: null,
+        ownerInfo: null,
+        userInfo: null,
+        childApps: []
     };
 
     const texts = {
@@ -67,14 +73,6 @@ define(["qlik", "jquery", "text!./style.css", "./props", "./leonardo",
 
             } else {
 
-                // turn off (white) bg color of this object
-                // $('[tid="' + ownId + '"] .qv-inner-object').css('background-color', layout.pNoBkgr ? 'rgba(0,0,0,0)' : '');
-                // $('[tid="' + ownId + '"] .qv-object').css('border-color', layout.pNoBkgr ? 'rgba(0,0,0,0)' : '');
-                // if (layout.pNoBkgr) {
-                //     $('[tid="' + ownId + '"] header').hide();
-                // }
-
-
                 html = `<div id="parent_${ownId}">
                     <button class="qfr-db-button-on-sheet  lui-button" title="${texts.btnHoverText}">
                         <img id="dblogo_${ownId}" src="../extensions/db-ext-qloudfriend/pics/db-logo.png"></span>
@@ -82,23 +80,13 @@ define(["qlik", "jquery", "text!./style.css", "./props", "./leonardo",
                     <button id="btn1_${ownId}" class="lui-button qloudFriend-${layout.pUseBtn1}" title="${texts.btnHoverText1}">
                         ${layout.pBtnLabel1}
                     </button>
-                    <!--
-                    <button id="btn2_publish_${ownId}" class="lui-button qloudFriend-${layout.pUseBtn2}" style="display:none;">
-                        ${layout.pBtnLabel2_publish}
-                    </button>
-                    <button id="btn2_unpublish_${ownId}" class="lui-button qloudFriend-${layout.pUseBtn2}" style="display:none;">
-                        ${layout.pBtnLabel2_unpublish}
-                    </button> 
-                    <button id="btn3_${ownId}" class="lui-button qloudFriend-${layout.pUseBtn3}">
-                        ${layout.pBtnLabel3}
-                    </button>
-                    -->
                 </div>`;
 
                 $element.html(html);
+                if (!qlobal.appInfo) {
+                    functions.getQlobalInfo(qlobal);
+                }
 
-
-                // button2.getSheetStatus(ownId, layout, qlobal);
                 const createdButton1stTime = $('.qloudFriend-toolbar-button').length == 0;
                 $('.qloudFriend-toolbar-button').remove();
                 const sel = '[data-testid="qs-sub-toolbar__right"]';
@@ -108,7 +96,7 @@ define(["qlik", "jquery", "text!./style.css", "./props", "./leonardo",
                         <span class="databridge_logo"></span>
                     </button>`);
                 $('.qloudFriend-toolbar-button, .qfr-db-button-on-sheet').click(function () {
-                    button2.toolbarButton(ownId, layout, qlobal);
+                    friend.friendButton(ownId, layout, qlobal);
                 })
 
                 // animate that the button is created on top panel
@@ -138,8 +126,8 @@ define(["qlik", "jquery", "text!./style.css", "./props", "./leonardo",
                 $("#btn1_" + ownId).on("click", function () { button1.click(ownId, app); });
                 // $("#btn99_" + ownId).on("click", function () { console.log(qlobal) });
 
-                $("#btn2_publish_" + ownId).on("click", function () { button2.publish() });
-                $("#btn2_unpublish_" + ownId).on("click", function () { button2.unpublish() });
+                // $("#btn2_publish_" + ownId).on("click", function () { friend.publish() });
+                // $("#btn2_unpublish_" + ownId).on("click", function () { friend.unpublish() });
                 // $("#btn2_edit_" + ownId).on("click", function () { qlik.navigation.setMode('edit') });
                 // $("#btn2_analyse_" + ownId).on("click", function () { qlik.navigation.setMode('analysis') });
                 // $("#btn3_" + ownId).on("click", function () { button3.click(ownId, layout); });

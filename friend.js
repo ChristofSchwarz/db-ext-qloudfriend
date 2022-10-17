@@ -1,26 +1,14 @@
-// Button 1 Click Handler
+// Main qloudFriend window handler
 
-define(["qlik", "jquery", "../leonardo", "../functions"], function
-    (qlik, $, leonardo, functions) {
+define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"], function
+    (qlik, $, leonardo, functions, rawHtml) {
 
     const markSelector = '.sheet-title-container';
-    // const markSelector = '[tid="qs-sub-toolbar"]';
-    // const modSelector = '#sheet-title .sheet-title-text'
-    const colors = {
-        public: 'lightgreen',
-        community: 'yellow',
-        private: 'pink'
-    }
 
     const close_button = `
         <button class="lui-button qfr-close-msg" style="float:right;padding: 0 5px;min-width: 20px;height: unset;">
             <span class="lui-icon  lui-icon--small  lui-icon--close"></span>
         </button>`;
-
-    // const texts = {
-    //     private: `<span class="lui-icon  lui-icon--warning-triangle"></span><span>&nbsp;This sheet is private.</span>`,
-    //     published: '<span class="lui-icon  lui-icon--share"></span><span>&nbsp;This sheet is published</span>'
-    // }
 
     const texts = {
         sourceData: 'Copy data from this app to child app',
@@ -88,102 +76,51 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
             })
         },
 
-        // publish: async function () {
-        //     await publishSheet();
-        // },
+        friendButton: async function (ownId, layout, qlobal) {
 
-        // unpublish: async function () {
-        //     await unpublishSheet();
-        // },
-
-        toolbarButton: async function (ownId, layout, qlobal) {
-
-            console.log('db button clicked', qlobal);
+            console.log('friendButton clicked', qlobal);
 
             const app = qlik.currApp();
             const currSheet = qlik.navigation.getCurrentSheetId().sheetId;
 
-            leonardo.msg('qloudFriend', qlobal.title,
-                `<div class="qloudFriend-rotate">
-                    <span class="lui-icon  lui-icon--reload"></span>
-                </div>`,
-                null, 'Cancel', null, null, dialogStyle
+            // leonardo.msg('qloudFriend', qlobal.title,
+            //     `<div class="qloudFriend-rotate">
+            //         <span class="lui-icon  lui-icon--reload"></span>
+            //     </div>`,
+            //     null, 'Cancel', null, null, dialogStyle
+            // );
+
+
+            const html = rawHtml
+                .replace(new RegExp('{{ownId}}', 'g'), ownId)
+                .replace(new RegExp('{{spaceInfo}}', 'g'), getAppInfoHtml(qlobal))
+                .replace(new RegExp('{{texts.sourceData}}', 'g'), texts.sourceData)
+                .replace(new RegExp('{{texts.targetData}}', 'g'), texts.targetData)
+
+
+            // Render the main window
+            leonardo.msg('qloudFriend', qlobal.title + close_button, html,
+                null, /*'Cancel'*/ null, null, null, dialogStyle
             );
 
             const res = await getSheetStatus(ownId, layout, qlobal);
 
-            var sheetTable = `<div style="overflow-y:auto;max-height:240px;">
-                <table class="qloudFriend-sheetTable">
-                    <thead>
-                        <tr>
-                            <th>&nbsp;</th>
-                            <th class="qfr-th-sort">Sheet</th>
-                            <th class="qfr-th-sort">Tag</th>
-                            <th class="qfr-th-sort">Published</th>
-                            <th class="qfr-th-sort">Approved</th>
-                        </tr>
-                    </thead>
-                    <tbody id="${ownId}-tbody">
-                    </tbody>
-                </table>
-                </div>`;
+            $('.qloudFriend-rotate').hide();
+            $('#qfr-sheetlist-section').show();
 
-            leonardo.msg('qloudFriend',
-                //(res.sheetInfo.published ? texts.published : texts.private) + close_button,
-                qlobal.title + close_button,
-                // null, 
-                `<div class="qfr-tablefilter">
-                    <span class="lui-icon  lui-icon--filter"></span> Filter sheets
-                    <label class="lui-checkbox">
-                        <input type="checkbox" id="qfr-show-all" class="lui-checkbox__input" aria-label="Label" />
-                        <div class="lui-checkbox__check-wrap">
-                            <span class="lui-checkbox__check"></span>
-                            <span class="lui-checkbox__check-text">all <span id="qfr-all-counter" class="qfr-counter-normal"></span></span>
-                        </div>
-                    </label>
-                    &nbsp;
-                    <label class="lui-checkbox">
-                        <input type="checkbox" id="qfr-show-warnings" class="lui-checkbox__input" aria-label="Label" checked />
-                        <div class="lui-checkbox__check-wrap">
-                            <span class="lui-checkbox__check"></span>
-                            <span class="lui-checkbox__check-text">warnings <span id="qfr-warnings-counter" class="qfr-counter-normal"></span></span>
-                        </div>
-                    </label>
-                    &nbsp;
-                    <label class="lui-checkbox">
-                        <input type="checkbox" id="qfr-show-own" class="lui-checkbox__input" aria-label="Label" checked />
-                        <div class="lui-checkbox__check-wrap">
-                            <span class="lui-checkbox__check"></span>
-                            <span class="lui-checkbox__check-text">current <span class="qfr-counter-normal">1</span></span>
-                        </div>
-                    </label>
-                </div>` + sheetTable +
-                `<div id="qfr-spaceinfo">...</div>`,
-                null, /*'Cancel'*/ null, null, null, dialogStyle
-            );
-
-
+            // Handle for "X" button
             $('.qfr-close-msg').click(() => {
                 $('#msg_parent_qloudFriend').remove();
             });
 
 
-
             var sheetCount = 0;
-            // var sheetWarningCount = 0;
             for (const sheet in qlobal.sheetInfo) {
+
                 sheetCount++;
                 const thisSheet = qlobal.sheetInfo[sheet];
-                // console.log('sheet description', thisSheet.description);
                 var tag = thisSheet.qloudfriendTag
-                // if (thisSheet.description.toLowerCase().indexOf('(private)') > -1 ||
-                //     thisSheet.description.toLowerCase().indexOf('(priv)') > -1) {
-                //     tag = 'private';
-                // }
-                // if (thisSheet.description.toLowerCase().indexOf('(public)') > -1 ||
-                //     thisSheet.description.toLowerCase().indexOf('(publ)') > -1) {
-                //     tag = 'public';
-                // }
+
 
                 const isApprovedSheet = thisSheet.approved == true;
                 const isPublishedSheet = thisSheet.published == true;
@@ -213,7 +150,6 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                         </td>
                     </tr>`);
 
-                // if (setRightOrWrong(sheet, tag, thisSheet.published) == 'wrong') sheetWarningCount++;
                 setRightOrWrong(sheet, tag, thisSheet.published);
 
                 // Handle click on the tag column in that row
@@ -246,16 +182,31 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                     }
                 })
             }
-            // set counters in filter row
+
+            // set counter in filter row
             $('#qfr-all-counter').html(sheetCount);
-            // $('#qfr-warnings-counter').html(sheetWarningCount);
+
+            // show the right rows (initial filter settings)
+            function showRows(all, warnings, own) {
+                $(`#${ownId}-tbody`).find('.qfr_sheetTableRow').each((i, elem) => {
+                    if (all
+                        || ($(elem).find('.qfr-cb-wrong').length && warnings)
+                        || ($(elem).find('.lui-icon--arrow-right').length && own)) {
+                        $(elem).show();
+                    } else {
+                        $(elem).hide();
+                    }
+                });
+            }
+
+            showRows(false, true, true);
 
             // Close tooltip if user clicked on X symbol.
             $(`.qfr-settag .lui-icon--close`).click((elem) => {
                 $(`.qfr-settag`).css('display', 'none');
             });
 
-            // handle click when user clicks on "public" in tooltip
+            // handle click when user clicks on "public" or "private" in tooltip
             $(`.qfr-span-public,.qfr-span-private`).click(async function (elem) {
                 const newTag = elem.target.innerText;
                 const sheetId = $(elem.target).parents('tr').attr('sheet');
@@ -285,20 +236,6 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                     }
                 }
             });
-
-            function showRows(all, warnings, own) {
-                $(`#${ownId}-tbody`).find('.qfr_sheetTableRow').each((i, elem) => {
-                    if (all
-                        || ($(elem).find('.qfr-cb-wrong').length && warnings)
-                        || ($(elem).find('.lui-icon--arrow-right').length && own)) {
-                        $(elem).show();
-                    } else {
-                        $(elem).hide();
-                    }
-                });
-            }
-
-            showRows(false, true, true);
 
             // handler for 3 filter checkboxes (1/3)
             $('#qfr-show-all').click((elem) => {
@@ -336,6 +273,7 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                 }
             });
 
+            // Handler for table sorting when clicking on th
             $('.qfr-th-sort').click(function () {
                 var table = $(`#${ownId}-tbody`)
                 var rows = table.find('tr').toArray().sort(comparer($(this).index()));
@@ -357,20 +295,24 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                 return $(row).children('td').eq(index).text()
             }
 
-            // console.log(res);
-            // Add action buttons
-            $(`#msg_parent_qloudFriend .lui-dialog__footer`).append(
-                `<button class="lui-button" id="qfr-btn-publish-app">Publish app</button>`
-            );
 
-            $('#qfr-btn-publish-app').click(async function () {
-                $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', true);
-                publishApp(app, qlobal);
-            });
+            // Add "publish app" action button
+            if (qlobal.childApps.length > 0) {
+                $(`#msg_parent_qloudFriend .lui-dialog__footer`).append(
+                    `<button class="lui-button" id="qfr-btn-publish-app">Republish app</button>`
+                );
 
+                $('#qfr-btn-publish-app').click(async function () {
+                    $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', true);
+                    publishApp(app, qlobal);
+                });
+            }
+
+            /*
             $(`#msg_parent_qloudFriend .lui-dialog__footer`).append(
                 `<button class="lui-button" id="qfr-btn-unpublish-sheet" style="display:none;">Checkout sheet</button>`
             );
+
             $(`#msg_parent_qloudFriend .lui-dialog__footer`).append(
                 `<button class="lui-button" id="qfr-btn-publish-sheet" style="display:none;">Publish Sheet</button>`
             );
@@ -397,8 +339,7 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
                     $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', false);
                 }
             });
-
-            $("#qfr-spaceinfo").html(getAppInfo(app.id));
+            */
 
         }
     }
@@ -513,67 +454,21 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
         return ret;
     }
 
-    function getAppInfo(appId) {
-        var appInfo;
-        var userInfo;
-        var ownerInfo;
-        var spaceInfo;
-        var ret = '';
-        var httpHeaders = functions.getCloudHttpHeaders();
+    function getAppInfoHtml(qlobal) {
 
-        $.ajax({
-            url: `/api/v1/users/me`,
-            dataType: 'json',
-            method: 'GET',
-            headers: httpHeaders,
-            // data: { appId: appId },
-            async: false,  // wait for this call to finish.
-            success: function (res) { userInfo = res; }
-        });
-
-        $.ajax({
-            url: `/api/v1/apps/${appId}`,
-            dataType: 'json',
-            method: 'GET',
-            headers: httpHeaders,
-            // data: { appId: appId },
-            async: false,  // wait for this call to finish.
-            success: function (res) { appInfo = res; }
-        });
-        // console.log('this app', appInfo);
-
-        $.ajax({
-            url: `/api/v1/users/${appInfo.attributes.ownerId}`,
-            dataType: 'json',
-            method: 'GET',
-            headers: httpHeaders,
-            // data: { appId: appId },
-            async: false,  // wait for this call to finish.
-            success: function (res) { ownerInfo = res; }
-        });
-        // console.log('Owner of app', ownerInfo);
-
-        if (appInfo.attributes.spaceId) {
-            $.ajax({
-                url: `/api/v1/spaces/${appInfo.attributes.spaceId}`,
-                dataType: 'json',
-                method: 'GET',
-                headers: httpHeaders,
-                // data: { appId: appId },
-                async: false,  // wait for this call to finish.
-                success: function (res) { spaceInfo = res; }
-            })
-
-            ret = functions.getSpaceIcon(spaceInfo.type, 'div') +
-                `<div>This app is in ${spaceInfo.type} space 
-                    &quot;<a href="/explore/spaces/${spaceInfo.id}" target="_blank">${spaceInfo.name}</a>&quot;
+        var ret;
+        if (qlobal.spaceInfo) {
+            ret = functions.getSpaceIcon(qlobal.spaceInfo.type, 'div') +
+                `<div>This app is in ${qlobal.spaceInfo.type} space 
+                    &quot;<a href="/explore/spaces/${qlobal.spaceInfo.id}" target="_blank">${qlobal.spaceInfo.name}</a>&quot;
                 </div>`;
 
         } else {
-            ret = (userInfo.id == ownerInfo.id ? '' : `<div><span class="lui-icon  lui-icon--warning-triangle"></div>`)
+            ret = (qlobal.userInfo.id == qlobal.ownerInfo.id ? ''
+                : `<div><span class="lui-icon  lui-icon--warning-triangle"></div>`)
                 + functions.getSpaceIcon("personal", 'div')
-                + `<div>This app is in ${userInfo.id == ownerInfo.id ? 'your' : ''} personal space`
-                + (userInfo.id == ownerInfo.id ? '.' : ` of ${ownerInfo.name}.`)
+                + `<div>This app is in ${qlobal.userInfo.id == qlobal.ownerInfo.id ? 'your' : ''} personal space`
+                + (qlobal.userInfo.id == qlobal.ownerInfo.id ? '.' : ` of ${qlobal.ownerInfo.name}.`)
                 + `</div>`;
         }
         return ret;
@@ -582,165 +477,74 @@ define(["qlik", "jquery", "../leonardo", "../functions"], function
 
     function publishApp(app, qlobal) {
 
-        leonardo.msg('qloudFriend', qlobal.title,
-            `<div class="qloudFriend-rotate">
-                <span class="lui-icon  lui-icon--reload"></span>
-            </div>`,
-            null, 'Close', null, null, dialogStyle);
+        $('#qfr-sheetlist-section').hide();
+        $('#qfr-spaceinfo').hide();
+        $('#qfr-publishapp-section').show();
 
         var httpHeaders = functions.getCloudHttpHeaders();
-        var appName;
 
-        $.ajax({
-            url: `/api/v1/items?resourceType=app&resourceId=${app.id}`,
-            dataType: 'json',
-            method: 'GET',
-            headers: httpHeaders,
-            // data: { appId: appId },
-            async: false,  // wait for this call to finish.
-            success: function (res) {
-                console.log('this app', res.data ? res.data[0] : 'no data');
-                appName = res.data[0].name;
-            }
-        })
+        for (const childApp of qlobal.childApps) {
 
-        // Loop the next API call as long as there are more pages (max size is 100)
-        var url = `/api/v1/items?resourceType=app&limit=99`;
-        var childApps = [];
-        var loop = 0;
-        while (url) {
-            loop++;
+            // API call to get the owner name of the app:
+            var user;
             $.ajax({
-                url: url,
-                //url: `/api/v1/items?resourceType=app&limit=50`,
+                url: `/api/v1/users/${childApp.ownerId}`,
                 dataType: 'json',
                 method: 'GET',
                 headers: httpHeaders,
-                // data: { appId: appId },
                 async: false,  // wait for this call to finish.
-                success: function (res) {
-                    const filteredApps = res.data.filter(e => {
-                        return e.resourceAttributes ? (e.resourceAttributes.originAppId == app.id) : false
-                    });
-                    // console.log(`Loop ${loop}, published childs`, filteredApps);
-                    childApps.push(...filteredApps);
-                    // console.log(`Loop ${loop}, more?`, res.links.next);
-                    url = res.links.next ? res.links.next.href : false;
-                }
+                success: function (res) { user = res; }
             })
-        }
-        // console.log(`after ${loop} loops I have this:`, childApps);
+            // API call to get the space name of the app:
+            var space;
+            $.ajax({
+                url: `/api/v1/spaces/${childApp.spaceId}`,
+                dataType: 'json',
+                method: 'GET',
+                headers: httpHeaders,
+                async: false,  // wait for this call to finish.
+                success: function (res) { space = res; }
+            });
 
-        if (childApps.length == 0) {
+            $(`#qfr-tbody-applist`).append(
+                `<tr>
+                    <td style="vertical-align:bottom;">${functions.getSpaceIcon('managed')}</td>
+                    <td><a href="/explore/spaces/${space.id}" target="_blank">${space.name}</a></td>
+                    <td><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a></td>
+                    <td>${user.name}</td>
+                    <td><button class="lui-button" id="publ_${childApp.resourceId}">Refresh</button></td>
+                </tr>`);
 
-            leonardo.msg('qloudFriend', qlobal.title,
-                'Note: This app has no published child apps yet.',
-                null, 'Close', null, null, dialogStyle);
-            $(`btn3_${ownId}`).removeAttr('disabled');
+            $(`#publ_${childApp.resourceId}`).click(() => {
+                $(`#publ_${childApp.resourceId}`).attr('disabled', true);
 
-        } else {
-
-            // Build a html table from childApps and lookup names of spaces and owners where needed
-
-            leonardo.msg('qloudFriend', qlobal.title,
-                `<div class="qfr-dataOptions">
-                    <strong>Options</strong>
-                    <label class="lui-radiobutton">
-                        <input class="lui-radiobutton__input" type="radio" aria-label="${texts.targetData}" name="qfr-datasource" value="target" checked>
-                        <div class="lui-radiobutton__radio-wrap">
-                            <span class="lui-radiobutton__radio"></span>
-                            <span class="lui-radiobutton__radio-text">${texts.targetData}</span>
-                        </div>
-                    </label>
-                    <label class="lui-radiobutton">
-                        <input class="lui-radiobutton__input" type="radio" aria-label="${texts.sourceData}" name="qfr-datasource" value="source">
-                        <div class="lui-radiobutton__radio-wrap">
-                            <span class="lui-radiobutton__radio"></span>
-                            <span class="lui-radiobutton__radio-text">${texts.sourceData}</span>
-                        </div>
-                    </label> 
-                    </div>
-                    <hr/>
-                    <div>Choose a child app to refesh</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>&nbsp;</th><th>Space</th><th>App Name</th><th>App Owner</th><th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="qfr-tbody-applist">
-                        </tbody>
-                    </table>`,
-                null, 'Close', null, null, dialogStyle);
-
-            for (const childApp of childApps) {
-
-                // API call to get the owner name of the app:
-                var user;
                 $.ajax({
-                    url: `/api/v1/users/${childApp.ownerId}`,
-                    dataType: 'json',
-                    method: 'GET',
+                    url: `/api/v1/apps/${app.id}/publish`,
+                    // dataType: 'json',
+                    method: 'PUT',
+                    contentType: "application/json",
                     headers: httpHeaders,
+                    data: JSON.stringify({
+                        targetId: childApp.resourceId,
+                        data: $('[name="qfr-datasource"]:checked').val() || 'target'
+                    }),
                     async: false,  // wait for this call to finish.
                     success: function (res) {
-                        user = res;
-                    }
-                })
-                // API call to get the space name of the app:
-                var space;
-                $.ajax({
-                    url: `/api/v1/spaces/${childApp.spaceId}`,
-                    dataType: 'json',
-                    method: 'GET',
-                    headers: httpHeaders,
-                    async: false,  // wait for this call to finish.
-                    success: function (res) {
-                        space = res;
+                        leonardo.msg('qloudFriend', qlobal.title,
+                            `<div class="lui-text-success">
+                                <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
+                                Success
+                            </div>
+                            <div><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a> 
+                                in space &quot;${space.name}&quot; has been successfully republished.
+                            </div>`,
+                            null, 'Close');
+                    },
+                    error: function (err) {
+                        functions.showApiError(err);
                     }
                 });
-
-                $(`#qfr-tbody-applist`).append(
-                    `<tr>
-                            <td style="vertical-align:bottom;">${functions.getSpaceIcon('managed')}</td>
-                            <td><a href="/explore/spaces/${space.id}" target="_blank">${space.name}</a></td>
-                            <td><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a></td>
-                            <td>${user.name}</td>
-                            <td><button class="lui-button" id="publ_${childApp.resourceId}" style="height:unset;">Refresh</button></td>
-                        </tr>`);
-
-                $(`#publ_${childApp.resourceId}`).click(() => {
-                    $(`#publ_${childApp.resourceId}`).attr('disabled', true);
-
-                    $.ajax({
-                        url: `/api/v1/apps/${app.id}/publish`,
-                        // dataType: 'json',
-                        method: 'PUT',
-                        contentType: "application/json",
-                        headers: httpHeaders,
-                        data: JSON.stringify({
-                            targetId: childApp.resourceId,
-                            data: $('[name="qfr-datasource"]:checked').val() || 'target'
-                        }),
-                        async: false,  // wait for this call to finish.
-                        success: function (res) {
-                            leonardo.msg('qloudFriend', qlobal.title,
-                                `<div class="lui-text-success">
-                                    <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
-                                    Success
-                                </div>
-                                <div><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a> 
-                                    in space &quot;${space.name}&quot; has been successfully republished.
-                                </div>`,
-                                null, 'Close');
-                        },
-                        error: function (err) {
-                            functions.showApiError(err);
-                        }
-                    });
-                })
-            }
-
+            })
         }
     }
 });

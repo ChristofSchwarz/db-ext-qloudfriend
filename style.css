@@ -377,6 +377,7 @@
 
 .qfr-version {
   color: #fdcb00;
+  font-size: x-small;
 }
 
 .qloudFriend-dialog .lui-dialog__title {
@@ -385,4 +386,23 @@
 
 .lui-dialog--inverse .lui-dialog__title {
   color: white;
+}
+
+#qfr-publishapp-section thead tr {
+  background-color: #f8f8f8;
+  height: 22px;
+}
+
+#qfr-publishapp-section thead th {
+  vertical-align: middle;
+}
+
+#qfr-publishapp-section th,
+#qfr-publishapp-section td {
+  padding: 0 2px;
+}
+
+#qfr-publishapp-section .lui-button {
+  height: unset;
+  padding: 0 4px;
 }
