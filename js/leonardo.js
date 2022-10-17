@@ -13,7 +13,7 @@ define(["jquery"], function ($) {
             var html =
                 `<div id="msg_parent_${ownId}">
                     <div class="lui-modal-background"></div>
-                    <div class="lui-dialog  ${inverse ? 'lui-dialog--inverse' : ''}  qloudFriend-dialog" 
+                    <div class="lui-dialog  ${inverse ? 'lui-dialog--inverse' : ''}  qfr-dialog" 
                         ${styles ? ('style="' + styles + '"') : ''}>
                         <div class="lui-dialog__header" ${title ? '' : 'style="display:none;"'}>
                             <div class="lui-dialog__title">

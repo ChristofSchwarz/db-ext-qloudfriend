@@ -1,6 +1,6 @@
-define(["qlik", "jquery", "text!./style.css", "./props", "./functions",
-    "./buttons/1", "./friend"], function
-    (qlik, $, cssContent, props, functions, button1, friend) {
+define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
+    "./js/reload", "./js/friend"], function
+    (qlik, $, cssContent, props, functions, reloadBtn, friend) {
 
     'use strict';
 
@@ -13,12 +13,13 @@ define(["qlik", "jquery", "text!./style.css", "./props", "./functions",
         spaceInfo: null,
         ownerInfo: null,
         userInfo: null,
-        childApps: []
+        childApps: [],
+        showFriend: false
     };
 
     const texts = {
-        btnHoverText: 'click to open data/\\bridge qlikcloud actions.',
-        btnHoverText1: 'Trigger a reload in the background for this app.',
+        btnHoverTextFriend: 'click to open data/\\bridge qlikcloud actions.',
+        btnHoverTextReload: 'Trigger a reload in the background for this app.',
     }
 
     if (!qlobal.qext) $.ajax({
@@ -74,67 +75,71 @@ define(["qlik", "jquery", "text!./style.css", "./props", "./functions",
             } else {
 
                 html = `<div id="parent_${ownId}">
-                    <button class="qfr-db-button-on-sheet  lui-button" title="${texts.btnHoverText}">
+                    <button class="qfr-db-button-on-sheet  lui-button" title="${texts.btnHoverTextFriend}" style="display:none;">
                         <img id="dblogo_${ownId}" src="../extensions/db-ext-qloudfriend/pics/db-logo.png"></span>
                     </button>
-                    <button id="btn1_${ownId}" class="lui-button qloudFriend-${layout.pUseBtn1}" title="${texts.btnHoverText1}">
-                        ${layout.pBtnLabel1}
+                    <button id="btn1_${ownId}" class="lui-button qfr-${layout.pUseReloadBtn}" title="${texts.btnHoverTextReload}">
+                        ${layout.pLabelReloadBtn}
                     </button>
                 </div>`;
 
                 $element.html(html);
+
                 if (!qlobal.appInfo) {
                     functions.getQlobalInfo(qlobal);
                 }
 
-                const createdButton1stTime = $('.qloudFriend-toolbar-button').length == 0;
-                $('.qloudFriend-toolbar-button').remove();
-                const sel = '[data-testid="qs-sub-toolbar__right"]';
-                const classes = $(`${sel} button:last`).attr('class'); // get the classes of the existing button in DOM
-                $(sel).append(`<button class="${classes} qloudFriend-toolbar-button" 
-                        title="${texts.btnHoverText}" ${createdButton1stTime ? 'style="width:0px;"' : ''}> 
+                qlobal.showFriend = !qlobal.spaceInfo
+                    || !(layout.pHideInManagedApps && qlobal.spaceInfo.type == 'managed')
+                    || !layout.pHideInManagedApps
+                if (qlobal.showFriend) $(`#parent_${ownId} .qfr-db-button-on-sheet`).show();
+
+                const createdButton1stTime = $('.qfr-toolbar-button').length == 0;
+                $('.qfr-toolbar-button').remove();
+                if (qlobal.showFriend) {
+                    const sel = '[data-testid="qs-sub-toolbar__right"]';
+                    const classes = $(`${sel} button:last`).attr('class'); // get the classes of the existing button in DOM
+                    $(sel).append(`<button class="${classes} qfr-toolbar-button" 
+                        title="${texts.btnHoverTextFriend}" ${createdButton1stTime ? 'style="width:0px;"' : ''}> 
                         <span class="databridge_logo"></span>
                     </button>`);
-                $('.qloudFriend-toolbar-button, .qfr-db-button-on-sheet').click(function () {
-                    friend.friendButton(ownId, layout, qlobal);
-                })
+                    $('.qfr-toolbar-button, .qfr-db-button-on-sheet').click(function () {
+                        friend.friendButton(layout, qlobal);
+                    })
 
-                // animate that the button is created on top panel
-                if (createdButton1stTime) {
-                    setTimeout(function () {
-                        const pos1 = $(`#dblogo_${ownId}`).offset();
-                        const pos2 = $(`.qloudFriend-toolbar-button`).offset();
-                        console.log(pos1, pos2);
-                        var btn_copy = $(`#dblogo_${ownId}`).clone()
-                            .prop('id', `dblogo2_${ownId}`)
-                            .css({
-                                position: 'absolute',
-                                "z-index": 12345,
-                                width: '23px',
-                                top: pos1.top,
-                                left: pos1.left
-                            });
-                        $('#qv-page-container').append(btn_copy);
-                        btn_copy.animate(pos2, 1000, 'swing', () => {
-                            $('.qloudFriend-toolbar-button').animate({ width: '42px' }, 500, 'swing', () => {
-                                btn_copy.remove();
-                            });
-                        });
-                    }, 300);
+                    // animate that the button is created on top panel
+                    if (createdButton1stTime) {
+                        animateIcon(ownId);
+                    }
                 }
 
-                $("#btn1_" + ownId).on("click", function () { button1.click(ownId, app); });
-                // $("#btn99_" + ownId).on("click", function () { console.log(qlobal) });
+                $("#btn1_" + ownId).on("click", function () { reloadBtn.click(ownId, app); });
 
-                // $("#btn2_publish_" + ownId).on("click", function () { friend.publish() });
-                // $("#btn2_unpublish_" + ownId).on("click", function () { friend.unpublish() });
-                // $("#btn2_edit_" + ownId).on("click", function () { qlik.navigation.setMode('edit') });
-                // $("#btn2_analyse_" + ownId).on("click", function () { qlik.navigation.setMode('analysis') });
-                // $("#btn3_" + ownId).on("click", function () { button3.click(ownId, layout); });
-                // updating the elements without repainting entire extension html
-                $('#button_parent_' + ownId + ' button').css('width', 'calc(' + layout.pBtnWidth2 + "% - 2px)");
             }
             return qlik.Promise.resolve();
         }
     };
+
+    function animateIcon(ownId) {
+        setTimeout(function () {
+            const pos1 = $(`#dblogo_${ownId}`).offset();
+            const pos2 = $(`.qfr-toolbar-button`).offset();
+            console.log(pos1, pos2);
+            var btn_copy = $(`#dblogo_${ownId}`).clone()
+                .prop('id', `dblogo2_${ownId}`)
+                .css({
+                    position: 'absolute',
+                    "z-index": 12345,
+                    width: '23px',
+                    top: pos1.top,
+                    left: pos1.left
+                });
+            $('#qv-page-container').append(btn_copy);
+            btn_copy.animate(pos2, 1000, 'swing', () => {
+                $('.qfr-toolbar-button').animate({ width: '42px' }, 500, 'swing', () => {
+                    btn_copy.remove();
+                });
+            });
+        }, 300);
+    }
 });

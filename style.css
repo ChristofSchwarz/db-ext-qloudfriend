@@ -9,7 +9,7 @@
   margin-right: 1px;
 }
 
-.qloudFriend-welcome {
+.qfr-welcome {
   font-size: 6.5pt;
   color: #aaa;
   position: absolute;
@@ -17,7 +17,7 @@
   right: 0px;
 }
 
-.qloudFriend-true {
+.qfr-true {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -25,30 +25,30 @@
   padding: 0 5px;
 }
 
-.qloudFriend-false {
+.qfr-false {
   display: none;
 }
 
-.qloudFriend-dialog {
+.qfr-dialog {
   position: absolute;
   top: 100px;
   width: 400px;
   left: calc(50% - 200px);
 }
 
-.qloudFriend-dialog .lui-dialog__header {
+.qfr-dialog .lui-dialog__header {
   padding: 8px 0 8px 8px;
 }
 
-.qloudFriend-dialog .lui-dialog__body div {
+.qfr-dialog .lui-dialog__body div {
   margin-bottom: 10px;
 }
 
-.qloudFriend-dialog th {
+.qfr-dialog th {
   text-align: left;
 }
 
-.qloudFriend-rotate {
+.qfr-rotate {
   width: 60px;
   margin-left: calc(50% - 30px);
   vertical-align: middle;
@@ -65,12 +65,12 @@
   -webkit-transform: rotate(1turn);
 }
 
-.qloudFriend-rotate .lui-icon--reload {
+.qfr-rotate .lui-icon--reload {
   font-size: xxx-large;
   color: lightgray;
 }
 
-.qloudFriend-spin {
+.qfr-spin {
   animation-name: rotate;
   animation-duration: 1.5s;
   animation-iteration-count: infinite;
@@ -87,45 +87,45 @@
   font-family: Source Sans Pro, sans-serif;
 }
 
-.qloudFriend-sheetTable td:nth-of-type(3),
-.qloudFriend-sheetTable td:nth-of-type(4),
-.qloudFriend-sheetTable td:nth-of-type(5) {
+.qfr-sheetTable td:nth-of-type(3),
+.qfr-sheetTable td:nth-of-type(4),
+.qfr-sheetTable td:nth-of-type(5) {
   text-align: center;
 }
-.qloudFriend-sheetTable th {
+.qfr-sheetTable th {
   position: sticky;
   top: 0;
   vertical-align: middle;
 }
 
-.qloudFriend-sheetTable tr {
+.qfr-sheetTable tr {
   height: 18pt;
 }
 
-.qloudFriend-sheetTable th:nth-of-type(1) {
+.qfr-sheetTable th:nth-of-type(1) {
   width: 20px;
 }
 
-.qloudFriend-sheetTable th:nth-of-type(3) {
+.qfr-sheetTable th:nth-of-type(3) {
   width: 65px;
   text-align: center;
 }
-.qloudFriend-sheetTable th:nth-of-type(4),
-.qloudFriend-sheetTable th:nth-of-type(5) {
+.qfr-sheetTable th:nth-of-type(4),
+.qfr-sheetTable th:nth-of-type(5) {
   width: 80px;
   text-align: center;
 }
 
-.qloudFriend-sheetTable th {
+.qfr-sheetTable th {
   background-color: #f8f8f8;
 }
 
-.qloudFriend-sheetTable a {
+.qfr-sheetTable a {
   text-decoration: underline;
   cursor: pointer;
 }
 
-.qloudFriend-toolbar-button {
+.qfr-toolbar-button {
   background-color: #092c4f;
   color: #ffcd00;
   min-width: unset;
@@ -211,7 +211,7 @@
   cursor: pointer;
 }
 
-.qfr_sheetTableRow td {
+.qfr-sheetTableRow td {
   padding-top: 1px;
 }
 
@@ -380,7 +380,7 @@
   font-size: x-small;
 }
 
-.qloudFriend-dialog .lui-dialog__title {
+.qfr-dialog .lui-dialog__title {
   color: #47739d;
 }
 
@@ -405,4 +405,9 @@
 #qfr-publishapp-section .lui-button {
   height: unset;
   padding: 0 4px;
+}
+
+#qfr-refresh-sheets {
+  cursor: pointer;
+  color: #999;
 }

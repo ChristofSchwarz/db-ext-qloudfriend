@@ -112,6 +112,7 @@ define(["qlik", "jquery", "./leonardo"], function
                 resolve(true);
             })
         }
+
     };
 
     function getCloudHttpHeaders() {

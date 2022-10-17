@@ -1,6 +1,6 @@
 // Button 1 Click Handler
 
-define(["qlik", "jquery", "../functions", "../leonardo"], function
+define(["qlik", "jquery", "./functions", "./leonardo"], function
     (qlik, $, functions, leonardo) {
 
     return {

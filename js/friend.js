@@ -1,6 +1,6 @@
 // Main qloudFriend window handler
 
-define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"], function
+define(["qlik", "jquery", "./leonardo", "./functions", "text!../html/window.html"], function
     (qlik, $, leonardo, functions, rawHtml) {
 
     const markSelector = '.sheet-title-container';
@@ -17,95 +17,34 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
 
     const dialogStyle = 'right:0;top:0;left:unset;width:480px;';
 
-    function getSheetStatus(ownId, layout, qlobal) {
-        return new Promise((resolve, reject) => {
-            // const enigma = app.model.enigmaModel;
-            const app = qlik.currApp();
-            const currSheet = qlik.navigation.getCurrentSheetId().sheetId;
-            var sheetInfo = {};
-            // var suggestedAction = '?';
-
-            app.getAppObjectList('sheet', function (reply) {
-
-                for (const sheet of reply.qAppObjectList.qItems) {
-                    console.log('sheet', sheet);
-                    // $.each(reply.qAppObjectList.qItems, function (key, sheet) {
-                    sheetInfo[sheet.qInfo.qId] = {
-                        rank: sheet.qData.rank,
-                        title: sheet.qMeta.title,
-                        description: sheet.qData.description || sheet.qData.descriptionExpression,
-                        ownerId: sheet.qMeta.ownerId,
-                        published: sheet.qMeta.published,
-                        approved: sheet.qMeta.approved,
-                        qloudfriendTag: sheet.qMeta.qloudfriendTag
-                    };
-                };
-
-                const thisSheet = sheetInfo[currSheet];
-                qlobal.sheetInfo = sheetInfo; // put sheetinfo to qlobal object
-
-                // console.log('thisSheet', thisSheet);
-                // $('.qloudFriend-hint').remove()
-                if (thisSheet.published && thisSheet.approved) {
-                    // $(markSelector).css('background-color', colors.public);
-                    $(`#btn2_${ownId}`).text('Make private');
-                    resolve({ action: '?', sheetInfo: thisSheet });
-                }
-                if (thisSheet.published && !thisSheet.approved) {
-                    // $(markSelector).css('background-color', colors.community);
-                    $(`#btn2_publish_${ownId}`).css('display', 'none');
-                    $(`#btn2_unpublish_${ownId}`).css('display', '');
-                    resolve({ action: 'unpublish', sheetInfo: thisSheet });
-                }
-                if (!thisSheet.published && !thisSheet.approved) {
-                    // $(markSelector).css('background-color', colors.private);
-                    $(`#btn2_publish_${ownId}`).css('display', '');
-                    $(`#btn2_unpublish_${ownId}`).css('display', 'none');
-                    resolve({ action: 'publish', sheetInfo: thisSheet });
-                }
-
-            });
-        })
-    }
-
-
     return {
-        getSheetStatus: function (ownId, layout, qlobal) {
-            return new Promise((resolve, reject) => {
-                getSheetStatus(ownId, layout, qlobal).then(res => resolve(res));
-            })
-        },
+        // getSheetStatus: function (ownId, layout, qlobal) {
+        //     return new Promise((resolve, reject) => {
+        //         getSheetStatus(ownId, layout, qlobal).then(res => resolve(res));
+        //     })
+        // },
 
-        friendButton: async function (ownId, layout, qlobal) {
+        friendButton: async function (layout, qlobal) {
 
             console.log('friendButton clicked', qlobal);
 
             const app = qlik.currApp();
-            const currSheet = qlik.navigation.getCurrentSheetId().sheetId;
-
-            // leonardo.msg('qloudFriend', qlobal.title,
-            //     `<div class="qloudFriend-rotate">
-            //         <span class="lui-icon  lui-icon--reload"></span>
-            //     </div>`,
-            //     null, 'Cancel', null, null, dialogStyle
-            // );
-
+            const currSheetId = qlik.navigation.getCurrentSheetId().sheetId;
 
             const html = rawHtml
-                .replace(new RegExp('{{ownId}}', 'g'), ownId)
+                // .replace(new RegExp('{{ownId}}', 'g'), ownId)
                 .replace(new RegExp('{{spaceInfo}}', 'g'), getAppInfoHtml(qlobal))
                 .replace(new RegExp('{{texts.sourceData}}', 'g'), texts.sourceData)
                 .replace(new RegExp('{{texts.targetData}}', 'g'), texts.targetData)
-
 
             // Render the main window
             leonardo.msg('qloudFriend', qlobal.title + close_button, html,
                 null, /*'Cancel'*/ null, null, null, dialogStyle
             );
 
-            const res = await getSheetStatus(ownId, layout, qlobal);
+            await getSheetList(layout, qlobal);
 
-            $('.qloudFriend-rotate').hide();
+            $('.qfr-rotate').hide();
             $('#qfr-sheetlist-section').show();
 
             // Handle for "X" button
@@ -113,129 +52,27 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
                 $('#msg_parent_qloudFriend').remove();
             });
 
-
-            var sheetCount = 0;
-            for (const sheet in qlobal.sheetInfo) {
-
-                sheetCount++;
-                const thisSheet = qlobal.sheetInfo[sheet];
-                var tag = thisSheet.qloudfriendTag
-
-
-                const isApprovedSheet = thisSheet.approved == true;
-                const isPublishedSheet = thisSheet.published == true;
-
-                $(`#${ownId}-tbody`).append(`
-                    <tr class="qfr_sheetTableRow" id="qfr_tr_${sheet}" 
-                        sheet="${sheet}" tag="${tag}">
-                        <td>
-                            ${sheet == currSheet ? '<span title="This is the current sheet" class="lui-icon  lui-icon--arrow-right"></span>' : '&nbsp;'}
-                        </td>
-                        <td>
-                            ${thisSheet.title}
-                        </td>
-                        <td class="qfr-col-tag  qfr-tag-${tag}${isApprovedSheet ? '  qfr-semitransparent' : ''}">
-                            ${tagHtml(tag, isApprovedSheet)}
-                        </td>
-                        <td class="qfr-col-published">
-                            <!--span class="qfr-cb-{bgIsRight}"-->
-                            <span>
-                            <input type="checkbox" id="qfr_cb_published_${sheet}" 
-                                ${isPublishedSheet ? ' checked' : ''}
-                                ${isApprovedSheet ? ' disabled' : ''}>
-                            </span>
-                        </td>
-                        <td>
-                            <input type="checkbox" disabled ${isApprovedSheet ? 'checked' : ''}>
-                        </td>
-                    </tr>`);
-
-                setRightOrWrong(sheet, tag, thisSheet.published);
-
-                // Handle click on the tag column in that row
-                $(`#qfr_tr_${sheet} .qfr-col-tag a`).click(() => {
-                    $(`#${ownId}-tbody .qfr-tooltip`).hide();
-                    const offset1 = $(`#qfr_tr_${sheet}`).offset();
-                    const offset2 = $(`#qfr_tr_${sheet}`).parents('table').find('th:nth-of-type(1)').offset();
-                    const offset3 = $(`.qloudFriend-dialog`).offset();
-                    console.log(offset1.top, offset2.top, offset3.top);
-                    $(`#qfr_tr_${sheet} .qfr-tooltip`).css('top', 13 + offset1.top - offset2.top + offset3.top).show();
-                });
-
-                // Handle click on the "published" checkbox of that row
-                $(`#qfr_cb_published_${sheet}`).click(async function (elem) {
-                    // $(elem.target).parent().removeClass("qfr-cb-wrong qfr-cb-right");
-                    const sheetId = $(elem.target).parents('tr').attr('sheet');
-                    const tag = qlobal.sheetInfo[sheetId].qloudfriendTag; //$(elem.target).parents('tr').attr('tag');
-                    if (elem.target.checked) {
-                        if (await publishSheet(sheet, qlobal)) {
-                            setRightOrWrong(sheet, tag, elem.target.checked);
-                        } else {
-                            $(`#qfr_cb_published_${sheet}`).prop('checked', false);
-                        }
-                    } else {
-                        if (await unpublishSheet(sheet, qlobal)) {
-                            setRightOrWrong(sheet, tag, elem.target.checked);
-                        } else {
-                            $(`#qfr_cb_published_${sheet}`).prop('checked', true);
-                        }
-                    }
-                })
-            }
-
-            // set counter in filter row
-            $('#qfr-all-counter').html(sheetCount);
+            sheetListHtml(qlobal, currSheetId);
 
             // show the right rows (initial filter settings)
-            function showRows(all, warnings, own) {
-                $(`#${ownId}-tbody`).find('.qfr_sheetTableRow').each((i, elem) => {
-                    if (all
-                        || ($(elem).find('.qfr-cb-wrong').length && warnings)
-                        || ($(elem).find('.lui-icon--arrow-right').length && own)) {
-                        $(elem).show();
-                    } else {
-                        $(elem).hide();
-                    }
-                });
-            }
-
             showRows(false, true, true);
+
+            // Handler for refresh-sheetlist
+            $(`#qfr-refresh-sheets`).click(async function () {
+                await getSheetList(layout, qlobal);
+                sheetListHtml(qlobal, currSheetId);
+                showRows(
+                    $('#qfr-show-all').prop('checked'),
+                    $('#qfr-show-warnings').prop('checked'),
+                    $('#qfr-show-own').prop('checked')
+                );
+            });
 
             // Close tooltip if user clicked on X symbol.
             $(`.qfr-settag .lui-icon--close`).click((elem) => {
                 $(`.qfr-settag`).css('display', 'none');
             });
 
-            // handle click when user clicks on "public" or "private" in tooltip
-            $(`.qfr-span-public,.qfr-span-private`).click(async function (elem) {
-                const newTag = elem.target.innerText;
-                const sheetId = $(elem.target).parents('tr').attr('sheet');
-                const wasPublished = qlobal.sheetInfo[sheetId].published;
-                $(elem.target).css('opacity', '50%');
-                var cont = true;
-                if (wasPublished) {
-                    // for a moment, unpublish the sheet
-                    cont = await unpublishSheet(sheetId, qlobal);
-                }
-                if (cont) {
-                    if (await setSheetTag(sheetId, newTag, qlobal)) {
-                        $(elem.target).css('opacity', '');
-                        $(`.qfr-settag`).css('display', 'none');
-                        if (wasPublished) {
-                            // if it was published before, publish again
-                            await publishSheet(sheetId, qlobal);
-                        }
-                        $(`#qfr_tr_${sheetId} .qfr-col-tag`)
-                            .removeClass('qfr-tag- qfr-tag-private qfr-tag-public')
-                            .addClass(`qfr-tag-` + newTag)
-                            .find('a').html(newTag);
-                        setRightOrWrong(sheetId, newTag, $(`#qfr_cb_published_${sheetId}`).is(':checked'));
-                    } else if (wasPublished) {
-                        // if it was published before, publish again
-                        await publishSheet(sheetId, qlobal);
-                    }
-                }
-            });
 
             // handler for 3 filter checkboxes (1/3)
             $('#qfr-show-all').click((elem) => {
@@ -275,7 +112,7 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
 
             // Handler for table sorting when clicking on th
             $('.qfr-th-sort').click(function () {
-                var table = $(`#${ownId}-tbody`)
+                var table = $(`#qfr-sheetTable-tbody`)
                 var rows = table.find('tr').toArray().sort(comparer($(this).index()));
                 this.asc = !this.asc;
                 if (!this.asc) {
@@ -308,47 +145,92 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
                 });
             }
 
-            /*
+            // Add Unpublish Sheet button
             $(`#msg_parent_qloudFriend .lui-dialog__footer`).append(
                 `<button class="lui-button" id="qfr-btn-unpublish-sheet" style="display:none;">Checkout sheet</button>`
             );
 
+            // Add Publish Sheet button
             $(`#msg_parent_qloudFriend .lui-dialog__footer`).append(
                 `<button class="lui-button" id="qfr-btn-publish-sheet" style="display:none;">Publish Sheet</button>`
             );
 
-            if (res.action == 'unpublish') {
-                $('#qfr-btn-unpublish-sheet').show();
-            } else if (res.action == 'publish') {
-                $('#qfr-btn-publish-sheet').show();
-            }
+            visibiltyOfSheetButtons(qlobal, currSheetId);
 
+            // Handler for Unpublish Sheet button
             $(`#qfr-btn-unpublish-sheet`).click(async function () {
                 $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', true);
-                if (await unpublishSheet(currSheet, qlobal, true)) {
+                if (await unpublishSheet(currSheetId, qlobal, true)) {
                     $('#msg_parent_qloudFriend').remove();
                 } else {
                     $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', false);
                 }
             });
+
+            // Handler for Publish Sheet button
             $(`#qfr-btn-publish-sheet`).click(async function () {
                 $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', true);
-                if (await publishSheet(currSheet, qlobal, true)) {
+                if (await publishSheet(currSheetId, qlobal, true)) {
                     $('#msg_parent_qloudFriend').remove();
                 } else {
                     $('#msg_parent_qloudFriend .lui-dialog__footer button').prop('disabled', false);
                 }
             });
-            */
 
         }
+    }
+
+    function visibiltyOfSheetButtons(qlobal, currSheetId) {
+
+        $(`#qfr-btn-publish-sheet`).hide();
+        $(`#qfr-btn-unpublish-sheet`).hide();
+
+        if (qlobal.sheetInfo[currSheetId].published && !qlobal.sheetInfo[currSheetId].approved) {
+            $(`#qfr-btn-unpublish-sheet`).show();
+        }
+        if (!qlobal.sheetInfo[currSheetId].published && !qlobal.sheetInfo[currSheetId].approved) {
+            $(`#qfr-btn-publish-sheet`).show();
+        }
+    }
+
+    function getSheetList(layout, qlobal) {
+        return new Promise((resolve, reject) => {
+            // const enigma = app.model.enigmaModel;
+            const app = qlik.currApp();
+            // const currSheetId = qlik.navigation.getCurrentSheetId().sheetId;
+            var sheetInfo = {};
+            // var suggestedAction = '?';
+
+            app.getAppObjectList('sheet', function (reply) {
+
+                for (const sheet of reply.qAppObjectList.qItems) {
+                    // console.log('sheet', sheet);
+                    // $.each(reply.qAppObjectList.qItems, function (key, sheet) {
+                    sheetInfo[sheet.qInfo.qId] = {
+                        rank: sheet.qData.rank,
+                        title: sheet.qMeta.title,
+                        description: sheet.qData.description || sheet.qData.descriptionExpression,
+                        ownerId: sheet.qMeta.ownerId,
+                        published: sheet.qMeta.published,
+                        approved: sheet.qMeta.approved,
+                        qloudfriendTag: sheet.qMeta.qloudfriendTag
+                    };
+                };
+
+                // const thisSheet = sheetInfo[currSheetId];
+                qlobal.sheetInfo = sheetInfo; // put sheetinfo to qlobal object
+
+                resolve(true);
+
+            });
+        })
     }
 
     async function publishSheet(whichSheet, qlobal, analysisMode = false) {
         const app = qlik.currApp();
         const enigma = app.model.enigmaModel;
-        const currSheet = whichSheet || qlik.navigation.getCurrentSheetId().sheetId;
-        const sheetObj = await enigma.getObject(currSheet);
+        const sheetId = whichSheet || qlik.navigation.getCurrentSheetId().sheetId;
+        const sheetObj = await enigma.getObject(sheetId);
         var ret = true;
         // console.log('sheetObj', sheetObj);
         if (analysisMode) {
@@ -372,8 +254,8 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
     async function unpublishSheet(whichSheet, qlobal, editMode = false) {
         const app = qlik.currApp();
         const enigma = app.model.enigmaModel;
-        const currSheet = whichSheet || qlik.navigation.getCurrentSheetId().sheetId;
-        const sheetObj = await enigma.getObject(currSheet)
+        const sheetId = whichSheet || qlik.navigation.getCurrentSheetId().sheetId;
+        const sheetObj = await enigma.getObject(sheetId)
         var ret = true;
         try {
             await sheetObj.unPublish();
@@ -395,7 +277,6 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
         return ret;
     }
 
-
     function setRightOrWrong(sheetId, tag, isPublished) {
         // determine color indicator for the type of sheet (published, private)
         var bgIsRight = 'unknown';
@@ -408,7 +289,7 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
             bgIsRight = 'wrong';
         }
         $(`#qfr_tr_${sheetId} .qfr-col-published span`).removeClass().addClass(`qfr-cb-${bgIsRight}`);
-        const warnings = $(`.qloudFriend-sheetTable .qfr-cb-wrong`).length;
+        const warnings = $(`.qfr-sheetTable .qfr-cb-wrong`).length;
         $(`#qfr-warnings-counter`)
             .removeClass()
             .addClass(warnings > 0 ? 'qfr-counter-alert' : 'qfr-counter-normal')
@@ -473,7 +354,6 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
         }
         return ret;
     }
-
 
     function publishApp(app, qlobal) {
 
@@ -547,4 +427,127 @@ define(["qlik", "jquery", "./leonardo", "./functions", "text!./html/window.html"
             })
         }
     }
+
+    function sheetListHtml(qlobal, currSheetId) {
+
+        $(`#qfr-sheetTable-tbody`).empty();
+        var sheetCount = 0;
+        for (const sheet in qlobal.sheetInfo) {
+
+            sheetCount++;
+            const thisSheet = qlobal.sheetInfo[sheet];
+            var tag = thisSheet.qloudfriendTag
+
+            const isApprovedSheet = thisSheet.approved == true;
+            const isPublishedSheet = thisSheet.published == true;
+
+            $(`#qfr-sheetTable-tbody`).append(`
+                <tr class="qfr-sheetTableRow" id="qfr_tr_${sheet}" 
+                    sheet="${sheet}" tag="${tag}">
+                    <td>
+                        ${sheet == currSheetId ?
+                    '<span title="This is the current sheet" class="lui-icon  lui-icon--arrow-right"></span>'
+                    : '&nbsp;'}
+                    </td>
+                    <td>
+                        ${thisSheet.title}
+                    </td>
+                    <td class="qfr-col-tag  qfr-tag-${tag}${isApprovedSheet ? '  qfr-semitransparent' : ''}">
+                        ${tagHtml(tag, isApprovedSheet)}
+                    </td>
+                    <td class="qfr-col-published">
+                        <!--span class="qfr-cb-{bgIsRight}"-->
+                        <span>
+                        <input type="checkbox" id="qfr_cb_published_${sheet}" 
+                            ${isPublishedSheet ? ' checked' : ''}
+                            ${isApprovedSheet ? ' disabled' : ''}>
+                        </span>
+                    </td>
+                    <td>
+                        <input type="checkbox" disabled ${isApprovedSheet ? 'checked' : ''}>
+                    </td>
+                </tr>`);
+
+            setRightOrWrong(sheet, tag, thisSheet.published);
+
+            // Handle click on the tag column in that row
+            $(`#qfr_tr_${sheet} .qfr-col-tag a`).click(() => {
+                $(`#qfr-sheetTable-tbody .qfr-tooltip`).hide();
+                const offset1 = $(`#qfr_tr_${sheet}`).offset();
+                const offset2 = $(`#qfr_tr_${sheet}`).parents('table').find('th:nth-of-type(1)').offset();
+                const offset3 = $(`.qfr-dialog`).offset();
+                // console.log(offset1.top, offset2.top, offset3.top);
+                $(`#qfr_tr_${sheet} .qfr-tooltip`).css('top', 13 + offset1.top - offset2.top + offset3.top).show();
+            });
+
+            // Handle click on the "published" checkbox of that row
+            $(`#qfr_cb_published_${sheet}`).click(async function (elem) {
+                // $(elem.target).parent().removeClass("qfr-cb-wrong qfr-cb-right");
+                const sheetId = $(elem.target).parents('tr').attr('sheet');
+                const tag = qlobal.sheetInfo[sheetId].qloudfriendTag; //$(elem.target).parents('tr').attr('tag');
+                if (elem.target.checked) {
+                    if (await publishSheet(sheet, qlobal)) {
+                        setRightOrWrong(sheet, tag, elem.target.checked);
+                        visibiltyOfSheetButtons(qlobal, currSheetId);
+                    } else {
+                        $(`#qfr_cb_published_${sheet}`).prop('checked', false);
+                    }
+                } else {
+                    if (await unpublishSheet(sheet, qlobal)) {
+                        setRightOrWrong(sheet, tag, elem.target.checked);
+                        visibiltyOfSheetButtons(qlobal, currSheetId);
+                    } else {
+                        $(`#qfr_cb_published_${sheet}`).prop('checked', true);
+                    }
+                }
+            })
+        }
+
+        // set counter in filter row
+        $('#qfr-all-counter').html(sheetCount);
+
+        // handle click when user clicks on "public" or "private" in tooltip
+        $(`.qfr-span-public,.qfr-span-private`).click(async function (elem) {
+            const newTag = elem.target.innerText;
+            const sheetId = $(elem.target).parents('tr').attr('sheet');
+            const wasPublished = qlobal.sheetInfo[sheetId].published;
+            $(elem.target).css('opacity', '50%');
+            var cont = true;
+            if (wasPublished) {
+                // for a moment, unpublish the sheet
+                cont = await unpublishSheet(sheetId, qlobal);
+            }
+            if (cont) {
+                if (await setSheetTag(sheetId, newTag, qlobal)) {
+                    $(elem.target).css('opacity', '');
+                    $(`.qfr-settag`).css('display', 'none');
+                    if (wasPublished) {
+                        // if it was published before, publish again
+                        await publishSheet(sheetId, qlobal);
+                    }
+                    $(`#qfr_tr_${sheetId} .qfr-col-tag`)
+                        .removeClass('qfr-tag- qfr-tag-private qfr-tag-public')
+                        .addClass(`qfr-tag-` + newTag)
+                        .find('a').html(newTag);
+                    setRightOrWrong(sheetId, newTag, $(`#qfr_cb_published_${sheetId}`).is(':checked'));
+                } else if (wasPublished) {
+                    // if it was published before, publish again
+                    await publishSheet(sheetId, qlobal);
+                }
+            }
+        });
+    }
+
+    function showRows(all, warnings, own) {
+        $('.qfr-sheetTableRow').each((i, elem) => {
+            if (all
+                || ($(elem).find('.qfr-cb-wrong').length && warnings)
+                || ($(elem).find('.lui-icon--arrow-right').length && own)) {
+                $(elem).show();
+            } else {
+                $(elem).hide();
+            }
+        });
+    }
+
 });

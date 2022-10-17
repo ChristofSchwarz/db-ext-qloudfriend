@@ -1,6 +1,7 @@
 // properties (accordion panel) db-ext-qloudFriend.js ...
 
-define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
+define(["qlik", "jquery"], function
+    (qlik, $) {
 
     return {
 
@@ -27,11 +28,8 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                     type: 'items',
                     component: 'expandable-items',
                     items: [
-                        // accordion_apikey(enigma),
-                        accordion_button1(),
-                        // accordion_button2(),
-                        // accordion_button3(),
-                        // accordion_presentation()
+                        accordion_friendButton(),
+                        accordion_reloadButton()
                     ]
                 }, {
                     label: 'About this extension',
@@ -43,22 +41,22 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
     }
 
 
-    function accordion_button1() {   // ---------- reload ----------
+    function accordion_reloadButton() {   // ---------- reload Button ----------
         return {
-            label: 'Button "Reload App"',
+            label: 'Reload Button',
             type: 'items',
             items: [{
                 type: "boolean",
                 defaultValue: true,
-                ref: "pUseBtn1",
+                ref: "pUseReloadBtn",
                 label: "Use Button"
             }, {
                 label: 'Button Label',
                 type: 'string',
                 expression: 'optional',
-                ref: 'pBtnLabel1',
+                ref: 'pLabelReloadBtn',
                 defaultValue: 'Reload',
-                show: function (data) { return data.pUseBtn1 }
+                show: function (data) { return data.pUseReloadBtn }
             }, /*{
                 type: "boolean",
                 component: "switch",
@@ -72,25 +70,25 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                     label: "Specific app (specify task)"
                 }],
                 defaultValue: true,
-                show: function (data) { return data.pUseBtn1 }
+                show: function (data) { return data.pUseReloadBtn }
             }, {
                 label: 'Task ID to trigger',
                 type: 'string',
                 ref: 'pTaskId',
                 expression: 'optional',
-                show: function (data) { return data.pUseBtn1 && !data.pReloadOwn }
+                show: function (data) { return data.pUseReloadBtn && !data.pReloadOwn }
             }, {
                 label: 'Hide within published apps',
                 type: 'boolean',
                 ref: 'pCBhideIfPublic',
                 defaultValue: false,
-                show: function (data) { return data.pUseBtn1 }
+                show: function (data) { return data.pUseReloadBtn }
             }, {
                 label: 'Conditional Show',
                 type: 'boolean',
                 ref: 'pCBshowIfFormula',
                 defaultValue: false,
-                show: function (data) { return data.pUseBtn1 }
+                show: function (data) { return data.pUseReloadBtn }
             }, {
                 label: 'Only show if the follwing is true:',
                 type: 'string',
@@ -100,7 +98,7 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                 ref: 'pShowCondition',
                 defaultValue: "=WildMatch(OSUser(), '*QMI-QS-SN*vagrant', '...')\n" +
                     "//put a list of users in single quotes and use format '*DIRECTORY*userid' including the asterisks",
-                show: function (data) { return data.pUseBtn1 && data.pCBshowIfFormula }
+                show: function (data) { return data.pUseReloadBtn && data.pCBshowIfFormula }
             }, {
                 label: "Text color",
                 component: "color-picker",
@@ -108,92 +106,37 @@ define(["qlik", "jquery", "./leonardo"], function (qlik, $, leonardo) {
                 type: "object",
                 //dualOutput: true,
                 defaultValue: "#333333",
-                show: function (data) { return data.pUseBtn1 }
+                show: function (data) { return data.pUseReloadBtn }
             }, {
                 label: "Background color",
                 component: "color-picker",
                 ref: "pBgColor1",
                 type: "object",
                 defaultValue: "#ffffff",
-                show: function (data) { return data.pUseBtn1 }
+                show: function (data) { return data.pUseReloadBtn }
             }*/]
         }
     }
 
-    function accordion_button2() {   // ---------- publish sheet ----------
+    function accordion_friendButton() {   // ---------- friend Button ----------
         return {
-            label: 'Button 2) Sheet Checkout',
+            label: 'qloudFriend Button',
             type: 'items',
             items: [{
                 type: "boolean",
                 defaultValue: true,
-                ref: "pUseBtn2",
-                label: "Use Button"
-            }, {
-                label: 'Button Label Checkout',
+                ref: "pHideInManagedApps",
+                label: "Hide in managed apps"
+            }/*, {
+                label: 'Only show if the follwing is true:',
                 type: 'string',
+                component: 'textarea',
+                rows: 4,
                 expression: 'optional',
-                ref: 'pBtnLabel2_unpublish',
-                defaultValue: 'Checkout Sheet',
-                show: function (data) { return data.pUseBtn2 }
-            }, {
-                label: 'Button Label Check-in',
-                type: 'string',
-                expression: 'optional',
-                ref: 'pBtnLabel2_publish',
-                defaultValue: 'Publish Sheet',
-                show: function (data) { return data.pUseBtn2 }
-            }, {
-                label: "Text color",
-                component: "color-picker",
-                ref: "pTxtColor2",
-                type: "object",
-                //dualOutput: true,
-                defaultValue: "#333333",
-                show: function (data) { return data.pUseBtn2 }
-            }, {
-                label: "Background color",
-                component: "color-picker",
-                ref: "pBgColor2",
-                type: "object",
-                defaultValue: "#ffffff",
-                show: function (data) { return data.pUseBtn2 }
-            }]
-        }
-    }
-
-    function accordion_button3() {   // ---------- publish app ----------
-        return {
-            label: 'Button 3) Publish App',
-            type: 'items',
-            items: [{
-                type: "boolean",
-                defaultValue: true,
-                ref: "pUseBtn3",
-                label: "Use Button"
-            }, {
-                label: 'Button Label',
-                type: 'string',
-                expression: 'optional',
-                ref: 'pBtnLabel3',
-                defaultValue: 'Publish App',
-                show: function (data) { return data.pUseBtn3 }
-            }, {
-                label: "Text color",
-                component: "color-picker",
-                ref: "pTxtColor3",
-                type: "object",
-                //dualOutput: true,
-                defaultValue: "#333333",
-                show: function (data) { return data.pUseBtn3 }
-            }, {
-                label: "Background color",
-                component: "color-picker",
-                ref: "pBgColor3",
-                type: "object",
-                defaultValue: "#ffffff",
-                show: function (data) { return data.pUseBtn3 }
-            }]
+                ref: 'pShowCondition',
+                defaultValue: "=WildMatch(OSUser(), '*QMI-QS-SN*vagrant', '...')\n" +
+                    "//put a list of users in single quotes and use format '*DIRECTORY*userid' including the asterisks"
+            }*/]
         }
     }
 
