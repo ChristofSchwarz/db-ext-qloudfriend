@@ -79,7 +79,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
                         <img id="dblogo_${ownId}" src="../extensions/db-ext-qloudfriend/pics/db-logo.png"></span>
                     </button>
                     <button id="btn1_${ownId}" class="lui-button qfr-${layout.pUseReloadBtn}" title="${texts.btnHoverTextReload}">
-                        ${layout.pLabelReloadBtn}
+                        ${layout.pLabelReloadBtn || 'Reload'}
                     </button>
                 </div>`;
 
