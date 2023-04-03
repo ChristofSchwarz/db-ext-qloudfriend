@@ -39,13 +39,14 @@
         <table class="qfr-sheetTable">
             <thead>
                 <tr>
-                    <th id="qfr-refresh-sheets">
+                    <th class="qfr-col-currsheet" id="qfr-refresh-sheets">
                         <span class="lui-icon  lui-icon--small  lui-icon--reload" title="Refresh sheet list"></span>
                     </th>
-                    <th class="qfr-th-sort">Sheet</th>
-                    <th class="qfr-th-sort">Tag</th>
-                    <th class="qfr-th-sort">Published</th>
-                    <th class="qfr-th-sort">Approved</th>
+                    <th class="qfr-col-rank qfr-th-sort">No.</th>
+                    <th class="qfr-col-title qfr-th-sort">Sheet</th>
+                    <th class="qfr-col-tag qfr-th-sort">Tag</th>
+                    <th class="qfr-col-published qfr-th-sort">Published</th>
+                    <th class="qfr-col-approved qfr-th-sort">Approved</th>
                 </tr>
             </thead>
             <tbody id="qfr-sheetTable-tbody">
@@ -54,6 +55,11 @@
     </div>
 </div>
 <div id="qfr-publishapp-section" style="display:none;">
+    <div id="qfr-publishapp-warning">
+        <span class="qfr-warning-triangle lui-icon  lui-icon--warning-triangle"></span>
+        <span id="qfr-publishapp-warning-text"></span>
+        <button id="qfr-btn-backtolist" class="lui-button">Go back</button>
+    </div>
     <div class="qfr-dataOptions">
         <strong>Options</strong>
         <label class="lui-radiobutton">

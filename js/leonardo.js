@@ -18,17 +18,15 @@ define(["jquery"], function ($) {
                         <div class="lui-dialog__header" ${title ? '' : 'style="display:none;"'}>
                             <div class="lui-dialog__title">
                                 <span>${title}</span>
-                                ${inverse ? '<!--' : ''}
                                 <a href="https://www.databridge.ch" target="_blank">
-                                    <img src="../extensions/db-ext-qloudfriend/pics/databridge-carousell.gif" class="qfr-databridge-title-img">
+                                    <img src="../extensions/db-ext-qloudfriend/pics/${inverse ? 'db_logo_dark.gif' : 'db_logo_white-small.gif'}" class="qfr-databridge-title-img">
                                 </a>
-                                ${inverse ? '-->' : ''}
                             </div>
                         </div>
                         <div class="lui-dialog__body" ${detail ? '' : 'style="display:none;"'}>
                             ${detail}
                         </div>
-                        <div class="lui-dialog__footer">
+                        <div class="lui-dialog__footer" style="height:unset;">
                         </div>
                     </div>
                 </div>`;

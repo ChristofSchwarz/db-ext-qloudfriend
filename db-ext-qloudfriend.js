@@ -1,8 +1,10 @@
-define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
-    "./js/reload", "./js/friend"], function
-    (qlik, $, cssContent, props, functions, reloadBtn, friend) {
+define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main", "./js/leonardo"], function
+    (qlik, $, cssContent, props, main, leonardo) {
 
     'use strict';
+    if (!main) console.warn('within db-ext-qloudfiend: main object', main);
+    if (!props) console.warn('within db-ext-qloudfiend: props object', props);
+    if (!leonardo) console.warn('within db-ext-qloudfiend: leonardo object', leonardo);
 
     // Initializing global object "qlobal"
     var qlobal = {
@@ -13,6 +15,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
         spaceInfo: null,
         ownerInfo: null,
         userInfo: null,
+        itemInfo: null,
         childApps: [],
         showFriend: false
     };
@@ -74,19 +77,22 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
 
             } else {
 
-                html = `<div id="parent_${ownId}">
-                    <button class="qfr-db-button-on-sheet  lui-button" title="${texts.btnHoverTextFriend}" style="display:none;">
-                        <img id="dblogo_${ownId}" src="../extensions/db-ext-qloudfriend/pics/db-logo.png"></span>
-                    </button>
-                    <button id="btn1_${ownId}" class="lui-button qfr-${layout.pUseReloadBtn}" title="${texts.btnHoverTextReload}">
-                        Reload
-                    </button>
-                </div>`;
+                html = `
+                    <div id="parent_${ownId}">
+                        <button class="qfr-db-button-on-sheet  lui-button" title="${texts.btnHoverTextFriend}" 
+                            style="display:none;">
+                            <img id="dblogo_${ownId}" src="../extensions/db-ext-qloudfriend/pics/db-logo.png">
+                        </button>
+                        <button id="reload_${ownId}" class="lui-button qfr-${layout.pUseReloadBtn}" 
+                            title="${texts.btnHoverTextReload}">
+                            Reload
+                        </button>
+                    </div>`;
 
                 $element.html(html);
 
                 if (!qlobal.appInfo) {
-                    functions.getQlobalInfo(qlobal);
+                    main.apiCtrl.getQlobalInfo(qlobal);
                 }
 
                 qlobal.showFriend = !qlobal.spaceInfo
@@ -94,8 +100,10 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
                     || !layout.pHideInManagedApps
                 if (qlobal.showFriend) $(`#parent_${ownId} .qfr-db-button-on-sheet`).show();
 
-                const createdButton1stTime = $('.qfr-toolbar-button').length == 0;
+                // const createdButton1stTime = $('.qfr-toolbar-button').length == 0;
+                const createdButton1stTime = !main.apiCtrl.isSessionInLocalStore(app.id);
                 $('.qfr-toolbar-button').remove();
+
                 if (qlobal.showFriend) {
                     const sel = '[data-testid="qs-sub-toolbar__right"]';
                     const classes = $(`${sel} button:last`).attr('class'); // get the classes of the existing button in DOM
@@ -104,16 +112,43 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/functions",
                         <span class="databridge_logo"></span>
                     </button>`);
                     $('.qfr-toolbar-button, .qfr-db-button-on-sheet').click(function () {
-                        friend.friendButton(layout, qlobal);
+                        main.open(layout, qlobal);
                     })
 
-                    // animate that the button is created on top panel
+
                     if (createdButton1stTime) {
+
+
+                        // animate that the button is created on top panel
                         animateIcon(ownId);
+                        main.apiCtrl.rememberSessionInLocalStore(app.id);
+
+                        // show warning about sheets that are published but shouldn't or 
+                        // that are private and shoud be public
+                        main.functions.getObjectSheetList(layout, qlobal).then(res => {
+                            if (res) {
+                                var sheetsWrong = main.functions.getWrongSheetsCount(qlobal);
+                                if (sheetsWrong > 0) {
+                                    setTimeout(() => {
+                                        leonardo.msg('qfr-main', null,
+                                            `<div style="margin-right:22px;text-align:right"> 
+                                                <span class="lui-icon  lui-icon--warning-triangle"></span>
+                                                ${sheetsWrong} sheet${sheetsWrong > 1 ? 's are' : ' is'} not in 
+                                                desired publish-state. Check here!
+                                            </div>
+                                            <img src="../extensions/db-ext-qloudfriend/pics/up-arrows.gif" 
+                                                style="width:36px;position:absolute;top:0;right:0;" />`,
+                                            null, 'Close', null, null, 'right:0;top:0;left:unset;width:140px;');
+                                    }, 1500);
+                                };
+                            }
+                        });
                     }
                 }
 
-                $("#btn1_" + ownId).on("click", function () { reloadBtn.click(ownId, app); });
+                $("#reload_" + ownId).on("click", function () {
+                    main.apiCtrl.reloadApp(ownId, app, qlobal);
+                });
 
             }
             return qlik.Promise.resolve();

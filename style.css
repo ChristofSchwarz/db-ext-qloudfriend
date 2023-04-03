@@ -87,11 +87,6 @@
   font-family: Source Sans Pro, sans-serif;
 }
 
-.qfr-sheetTable td:nth-of-type(3),
-.qfr-sheetTable td:nth-of-type(4),
-.qfr-sheetTable td:nth-of-type(5) {
-  text-align: center;
-}
 .qfr-sheetTable th {
   position: sticky;
   top: 0;
@@ -102,16 +97,27 @@
   height: 18pt;
 }
 
-.qfr-sheetTable th:nth-of-type(1) {
+/* .qfr-sheetTable td:nth-of-type(4),
+.qfr-sheetTable td:nth-of-type(5),
+.qfr-sheetTable td:nth-of-type(6) {
+  text-align: center;
+} */
+
+.qfr-sheetTable .qfr-col-currsheet {
   width: 20px;
 }
 
-.qfr-sheetTable th:nth-of-type(3) {
+.qfr-sheetTable .qfr-col-rank {
+  width: 30px;
+  text-align: center;
+}
+
+.qfr-sheetTable .qfr-col-tag {
   width: 65px;
   text-align: center;
 }
-.qfr-sheetTable th:nth-of-type(4),
-.qfr-sheetTable th:nth-of-type(5) {
+.qfr-sheetTable .qfr-col-published,
+.qfr-sheetTable .qfr-col-approved {
   width: 80px;
   text-align: center;
 }
@@ -120,9 +126,18 @@
   background-color: #f8f8f8;
 }
 
-.qfr-sheetTable a {
-  text-decoration: underline;
+.qfr-col-title a,
+.qfr-col-tag a {
   cursor: pointer;
+}
+
+.qfr-tooltip1-menu {
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.qfr-col-tag a {
+  text-decoration: underline;
 }
 
 .qfr-toolbar-button {
@@ -338,7 +353,9 @@
   border-right: 8px solid transparent;
   border-top: 8px solid rgba(0, 0, 0, 0.9);
 }
-.qfr-tooltip {
+
+.qfr-tooltip1,
+.qfr-tooltip2 {
   min-height: 28px;
   box-sizing: border-box;
   display: inline-block;
@@ -352,8 +369,30 @@
   color: #ffffff;
   background-color: rgba(0, 0, 0, 0.9);
 }
-.qfr-tooltip.lui-fade {
-  opacity: 0;
+
+#qfr-publishapp-warning {
+  background-color: lightyellow;
+}
+
+.qfr-warning-triangle {
+  color: red;
+  font-size: 15pt;
+}
+
+#qfr-btn-backtolist {
+  float: right;
+  background-color: white;
+}
+
+.qfr-tooltip1 .lui-icon--bin {
+  color: rgb(233, 135, 81);
+}
+
+.qfr-del-sheet-now {
+  border: 1px solid lightgray;
+  border-radius: 10px;
+  padding: 0 7px 0 7px;
+  background: red;
 }
 
 .qfr-databridge-title-img {
@@ -381,7 +420,8 @@
 }
 
 .qfr-dialog .lui-dialog__title {
-  color: #47739d;
+  color: #092d4d;
+  /* #47739d; */
 }
 
 .lui-dialog--inverse .lui-dialog__title {
@@ -410,4 +450,15 @@
 #qfr-refresh-sheets {
   cursor: pointer;
   color: #999;
+}
+
+#msg_parent_qfr-main .lui-dialog__footer button {
+  height: unset;
+  font-weight: normal;
+  padding: 0 5px;
+}
+
+#msg_parent_qfr-main .lui-dialog__footer {
+  height: unset;
+  text-align: center;
 }
