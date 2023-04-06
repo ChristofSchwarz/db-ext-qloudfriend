@@ -1,0 +1,24 @@
+{
+  "btnHoverTextFriend": "click to open data/\\bridge qlikcloud actions.",
+  "btnInfoHover": "Show app reload history and cancel a reload",
+  "infoWrongStateOne": "sheet is not in desired publish-state. Check here!",
+  "infoWrongStateMany": "sheets are not in desired publish-state. Check here!",
+  "questionTakeAway1": "Do you really want to take ownership away from",
+  "questionTakeAway2": "Note that he/she may lose access to some parts of the app such as the Load Script Editor.",
+  "appOwnerChanged": "App owner changed to you.",
+  "reloadTriggeredInfo": "Application reload triggered in the background, you can check the",
+  "reloadTriggeredLink": "status here.",
+  "appUpdated": "in space \"{{space}}\" has been successfully republished.",
+  "reloadMsg": {
+    "ready": "Trigger a reload in the background for this app.",
+    "QUEUED": "App is waiting to be reloaded.",
+    "RELOADING": "App is currently reloading.",
+    "FAILED": "App reload was not successful.",
+    "SUCCEEDED": "App reload was successful.",
+    "CANCELED": "App reload was cancelled.",
+    "error": "There was an error triggering the reload.",
+    "unknown": "Reload status {{status}} is unknown to QloudFriend extension."
+  },
+  "errUnpublishSheet": "Not possible to unpublish sheet",
+  "errPublishSheet": "Not possible to publish sheet"
+}

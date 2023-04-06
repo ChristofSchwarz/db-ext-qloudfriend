@@ -28,6 +28,7 @@ define(["qlik", "jquery"], function
                     type: 'items',
                     component: 'expandable-items',
                     items: [
+                        accordion_presentation(),
                         accordion_friendButton(),
                         accordion_reloadButton()
                     ]
@@ -56,65 +57,23 @@ define(["qlik", "jquery"], function
                 expression: 'optional',
                 ref: 'pLabelReloadBtn',
                 defaultValue: 'Reload',
-                show: function (data) { return data.pUseReloadBtn }
-            }, /*{
-                type: "boolean",
-                component: "switch",
-                label: "Reload Task",
-                ref: "pReloadOwn",
-                options: [{
-                    value: true,
-                    label: "Reload this app"
-                }, {
-                    value: false,
-                    label: "Specific app (specify task)"
-                }],
-                defaultValue: true,
-                show: function (data) { return data.pUseReloadBtn }
+                show: function (arg) { return arg.pUseReloadBtn }
             }, {
-                label: 'Task ID to trigger',
-                type: 'string',
-                ref: 'pTaskId',
-                expression: 'optional',
-                show: function (data) { return data.pUseReloadBtn && !data.pReloadOwn }
-            }, {
-                label: 'Hide within published apps',
-                type: 'boolean',
-                ref: 'pCBhideIfPublic',
-                defaultValue: false,
-                show: function (data) { return data.pUseReloadBtn }
-            }, {
-                label: 'Conditional Show',
-                type: 'boolean',
-                ref: 'pCBshowIfFormula',
-                defaultValue: false,
-                show: function (data) { return data.pUseReloadBtn }
-            }, {
-                label: 'Only show if the follwing is true:',
-                type: 'string',
-                component: 'textarea',
-                rows: 4,
-                expression: 'optional',
-                ref: 'pShowCondition',
-                defaultValue: "=WildMatch(OSUser(), '*QMI-QS-SN*vagrant', '...')\n" +
-                    "//put a list of users in single quotes and use format '*DIRECTORY*userid' including the asterisks",
-                show: function (data) { return data.pUseReloadBtn && data.pCBshowIfFormula }
-            }, {
-                label: "Text color",
+                label: "Text color of button",
                 component: "color-picker",
                 ref: "pTxtColor1",
                 type: "object",
                 //dualOutput: true,
-                defaultValue: "#333333",
+                defaultValue: "#222222",
                 show: function (data) { return data.pUseReloadBtn }
             }, {
-                label: "Background color",
+                label: "Background color of button",
                 component: "color-picker",
                 ref: "pBgColor1",
                 type: "object",
-                defaultValue: "#ffffff",
+                defaultValue: "#fefefe",
                 show: function (data) { return data.pUseReloadBtn }
-            }*/]
+            }]
         }
     }
 
@@ -127,16 +86,7 @@ define(["qlik", "jquery"], function
                 defaultValue: true,
                 ref: "pHideInManagedApps",
                 label: "Hide in managed apps"
-            }/*, {
-                label: 'Only show if the follwing is true:',
-                type: 'string',
-                component: 'textarea',
-                rows: 4,
-                expression: 'optional',
-                ref: 'pShowCondition',
-                defaultValue: "=WildMatch(OSUser(), '*QMI-QS-SN*vagrant', '...')\n" +
-                    "//put a list of users in single quotes and use format '*DIRECTORY*userid' including the asterisks"
-            }*/]
+            }]
         }
     }
 
@@ -145,46 +95,13 @@ define(["qlik", "jquery"], function
             label: 'Presentation',
             type: 'items',
             items: [
-                /*{
-                    label: 'Button width',
-                    type: 'integer',
-                    ref: 'pBtnWidth',
-                    component: 'slider',
-                    min: 10,
-                    max: 99,
-                    step: 1,
-                    defaultValue: 95
-                },*/
                 {
-                    type: "number",
-                    component: "dropdown",
-                    label: "Button Width",
-                    ref: "pBtnWidth2",
-                    options: [
-                        { value: 100, label: "1 per row" },
-                        { value: 100 / 2, label: "2 per row" },
-                        { value: 100 / 3, label: "3 per row" },
-                        { value: 100 / 4, label: "4 per row" },
-                        { value: 100 / 5, label: "5 per row" },
-                        { value: 100 / 6, label: "6 per row" }
-                    ],
-                }, {
-                    type: "string",
-                    component: "dropdown",
-                    label: "Show in the buttons",
-                    ref: "pIconTxt",
-                    defaultValue: "it",
-                    options: [
-                        { value: "t", label: "Text" },
-                        { value: "i", label: "Icon" },
-                        { value: "it", label: "Icon and Text" }
-                    ],
-                }, {
-                    type: "boolean",
-                    defaultValue: false,
-                    ref: "pNoBkgr",
-                    label: "Turn off background"
-                }]
+                    label: 'Hide background and border.',
+                    type: 'boolean',
+                    ref: 'pHideBackground',
+                    defaultValue: false
+                }
+            ]
         }
     }
 

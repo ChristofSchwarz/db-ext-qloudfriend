@@ -34,6 +34,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
         },
 
         getObjectSheetList: function (layout, qlobal) {
+            // returns a Promise to filling the qlobal.sheetInfo object.
             return new Promise((resolve, reject) => {
                 // const enigma = app.model.enigmaModel;
                 const app = qlik.currApp();
@@ -198,7 +199,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
             events.clickTooltip2Close();
             events.clickGoToSheet(qlobal);
             events.clickDeleteIcon();
-            events.clickDeleteYes();
+            events.clickDeleteYes(qlik.currApp(), qlobal);
 
             // set counter in filter row
             $('#qfr-all-counter').html(sheetCount);
@@ -379,17 +380,13 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
         },
 
         clickButtonChgOwner: function (qlobal) {
-            // Handler for Reload button
+            // Handler for Change Owner button
             $(`#qfr-btn-chgowner`).click(function () {
                 leonardo.msg('qfr-confirm', 'Confirm',
-                    `
-                        <div class="lui-text">
-                            Do you really want to take ownership away from ${qlobal.ownerInfo.name}? 
-                        </div>
-                        <div>
-                            Note that he/she may lose access to some parts of the app
-                            such as the Load Script Editor.
-                        </div>`
+                    `<div class="lui-text">
+                        ${qlobal.texts.questionTakeAway1} ${qlobal.ownerInfo.name}? 
+                    </div>
+                    <div>${qlobal.texts.questionTakeAway2}</div>`
                     , 'Yes', 'No', null);
                 $('#msg_ok_qfr-confirm').click(() => {
                     $('#msg_parent_qfr-confirm').remove();
@@ -403,6 +400,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
         clickButtonReload: function (ownId, app, qlobal) {
             // Handler for Reload button
             $(`#qfr-btn-reload2`).click(function () {
+                $('#msg_parent_qfr-main').remove();
                 apiCtrl.reloadApp(ownId, app, qlobal);
             })
         },
@@ -416,7 +414,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                 const wrongSheetsCount = functions.getWrongSheetsCount(qlobal);
                 if (wrongSheetsCount) {
                     $('#qfr-publishapp-warning-text')
-                        .text(`${wrongSheetsCount} sheet${wrongSheetsCount > 1 ? 's are' : ' is'} NOT in the desired publish-state!`);
+                        .text(`${wrongSheetsCount} ${wrongSheetsCount > 1 ? qlobal.texts.infoWrongStateMany : qlobal.texts.infoWrongStateOne}`);
                     $('#qfr-publishapp-warning').show();
                 } else {
                     $('#qfr-publishapp-warning').hide();
@@ -509,10 +507,12 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
             });
         },
 
-        clickDeleteYes: function (app) {
+        clickDeleteYes: function (app, qlobal) {
             // handle click on delete-yes button, finally delete object
             $('.qfr-del-sheet-now').click(async function (elem) {
                 const sheetId = $(elem.target).parents('tr').attr('sheet');
+                const tag = $(elem.target).parents('tr').attr('tag');
+                if (tag == 'public') await other.unpublishSheet(sheetId, qlobal);
                 const enigma = app.model.enigmaModel;
                 enigma.destroyObject(sheetId);
                 $(`.qfr-tooltip1-menu`).show();
@@ -574,7 +574,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
 
     const apiCtrl = {
 
-        getQlobalInfo: function (qlobal) {
+        getQlobalInfo: function (qlobal, ownId, layout) {
             // gets info about app and stores it into qlobal.appInfo, qlobal.userInfo
             // qlobal.ownerInfo, qlobal.spaceInfo, and qlobal.childApps
             console.log('Getting info about user, app, and space.');
@@ -664,7 +664,33 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                     })
                 }
 
-                console.log('qlobal updated', qlobal);
+                var loop = 0;
+                var url = `/api/v1/reloads?&appId=${app.id}&limit=99`;
+                while (url) {
+                    loop++;
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        method: 'GET',
+                        headers: httpHeaders,
+                        async: false,  // wait for this call to finish.
+                        success: function (res) {
+                            // find
+                            const incompleteReloads = res.data.filter(e => {
+                                return ['QUEUED', 'RELOADING'].indexOf(e.status) > -1
+                            })
+                            if (incompleteReloads.length > 0) {
+                                qlobal.ongoingReload = incompleteReloads[0];
+                                other.updateButtonStatus(ownId, incompleteReloads[0].status, qlobal, layout);
+                                url = false
+                            } else {
+                                url = res.links.next ? res.links.next.href : false;
+                            }
+                        }
+                    })
+                }
+
+                console.log('qloudfriend qlobal updated', qlobal);
                 resolve(true);
             })
         },
@@ -685,13 +711,16 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                 async: false,  // wait for this call to finish.
                 success: function (data) {
                     console.log(data);
+                    qlobal.ongoingReload = data;
                     leonardo.msg('qfr-success', 'Success',
                         `<div class="lui-text-success" style="float:left;margin-right:8px;">
                             <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
                         </div>
                         <div class="lui-text">
-                            Application reload triggered in the background, you can check the
-                            <a href="/item/${qlobal.itemInfo.id}/history" target="_blank">status here</a>.
+                            ${qlobal.texts.reloadTriggeredInfo}
+                            <a href="/item/${qlobal.itemInfo.id}/history" target="_blank">
+                                ${qlobal.texts.reloadTriggeredLink}
+                            </a>
                         </div>`
                         , null, 'Close', null);
                 },
@@ -721,8 +750,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                         `<div class="lui-text-success" style="float:left;margin-right:8px;">
                             <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
                         </div>
-                        <div class="lui-text">
-                            App owner changed to you.
+                        <div class="lui-text">${qlobal.texts.appOwnerChanged}
                         </div>`
                         , null, 'Close', null);
                 },
@@ -790,7 +818,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                                     Success
                                 </div>
                                 <div><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a> 
-                                    in space &quot;${space.name}&quot; has been successfully republished.
+                                    ${qlobal.texts.appUpdated.replace('{{space}}', space.name)}
                                 </div>`,
                                 null, 'Close');
                         },
@@ -806,7 +834,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
             var csrfToken = document.cookie.split(';').filter(e => e.indexOf('_csrfToken=') > -1)[0] || '';
             if (csrfToken) {
                 csrfToken = csrfToken.split('=')[1];
-                console.log('csrfToken', csrfToken);
+                // console.log('csrfToken', csrfToken);
             } else {
                 csrfToken = "";
                 console.warning('no _csrfToken found within Qlik Cloud cookies.');
@@ -877,7 +905,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
             }
             catch (err) {
                 leonardo.msg('qfr-error', 'Error',
-                    `Not possible to publish sheet: ${JSON.stringify(err)}`
+                    `${qlobal.texts.errPublishSheet}: ${JSON.stringify(err)}`
                     , null, 'Close', null, true);
                 ret = false;
             }
@@ -899,7 +927,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
             }
             catch (err) {
                 leonardo.msg('qfr-error', 'Error',
-                    `Not possible to unpublish sheet: ${JSON.stringify(err)}`
+                    `${qlobal.texts.errUnpublishSheet}: ${JSON.stringify(err)}`
                     , null, 'Close', null, true);
                 ret = false;
             }
@@ -948,6 +976,80 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                 }
             </div>`
                 , null, 'Close', null, true);
+        },
+
+        updateButtonStatus: function (ownId, status, qlobal, layout) {
+            const resetAfterMs = 10500;
+            const needsToChange = status != $(`#reload_${ownId}`).data('mode');
+            if (status == 'ready' && needsToChange) {
+                $(`#reload_${ownId}`)
+                    .html(layout.pLabelReloadBtn)
+                    .prop('title', qlobal.texts.reloadMsg['ready'])
+                    .data('mode', status)
+                    .prop('disabled', false);
+
+            } else if (status == 'QUEUED' && needsToChange) {
+                $(`#reload_${ownId}`)
+                    .html('<img src="../extensions/db-ext-qloudfriend/pics/hourglass.gif" />')
+                    .prop('title', qlobal.texts.reloadMsg[status])
+                    .data('mode', status)
+                    .prop('disabled', true);
+
+            } else if (status == 'RELOADING' && needsToChange) {
+                $(`#reload_${ownId}`)
+                    .html('<span class="lui-icon  lui-icon--reload"></span>')
+                    .prop('title', qlobal.texts.reloadMsg[status])
+                    .data('mode', status)
+                    .prop('disabled', true);
+
+            } else if (status == 'FAILED' && needsToChange) {
+                qlobal.ongoingReload = null;
+                $(`#reload_${ownId}`)
+                    .html('<span class="lui-icon  lui-icon--warning-triangle"></span>')
+                    .prop('title', qlobal.texts.reloadMsg[status])
+                    .data('mode', status)
+                    .prop('disabled', true);
+                qlobal.resetAfter = Date.now() + resetAfterMs;
+
+            } else if (status == 'SUCCEEDED' && needsToChange) {
+                qlobal.ongoingReload = null;
+                $(`#reload_${ownId}`)
+                    .html('<span class="lui-icon  lui-icon--tick"></span>')
+                    .prop('title', qlobal.texts.reloadMsg[status])
+                    .data('mode', status)
+                    .prop('disabled', true);
+                qlobal.resetAfter = Date.now() + resetAfterMs;
+
+            } else if (status == 'CANCELED' && needsToChange) {
+                qlobal.ongoingReload = null;
+                $(`#reload_${ownId}`)
+                    .html('<span class="lui-icon  lui-icon--close"></span>')
+                    .prop('title', qlobal.texts.reloadMsg[status])
+                    .data('mode', status)
+                    .prop('disabled', true);
+                qlobal.resetAfter = Date.now() + resetAfterMs;
+
+            } else if (status == 'error' && needsToChange) {
+                qlobal.ongoingReload = null;
+                $(`#reload_${ownId}`)
+                    .html('Error')
+                    .prop('title', qlobal.texts.reloadMsg[status])
+                    .data('mode', status)
+                    .prop('disabled', true);
+                qlobal.resetAfter = Date.now() + resetAfterMs;
+
+            } else if (needsToChange) {
+                const warn = qlobal.texts.reloadMsg.unknown.replace('{{status}}', status);
+                console.warn(warn);
+                qlobal.ongoingReload = null;
+                $(`#reload_${ownId}`)
+                    .html('?')
+                    .prop('title', warn)
+                    .data('mode', '?')
+                    .prop('disabled', true);
+                qlobal.resetAfter = Date.now() + resetAfterMs;
+
+            }
         }
     }
 
@@ -1049,8 +1151,37 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
 
         apiCtrl: apiCtrl,
 
-        functions: functions
+        functions: functions,
 
+        other: other,
+
+        intervalHandler: function (ownId, layout, qlobal) {
+            // console.log('qloudfriend interval ' + ownId, new Date());
+            if (Date.now() > qlobal.resetAfter && !qlobal.ongoingReload) {
+                other.updateButtonStatus(ownId, 'ready', qlobal, layout);
+            }
+            if (qlobal.ongoingReload) {
+                //console.log('ongoing Reload', qlobal.ongoingReload)
+                $.ajax({
+                    url: '/api/v1/reloads/' + qlobal.ongoingReload.id,
+                    //     // dataType: 'json',
+                    method: 'GET',
+                    //     contentType: "application/json",
+                    headers: apiCtrl.getCloudHttpHeaders(),
+                    async: false,  // wait for this call to finish.
+                    success: function (res) {
+                        // console.log(res.status);
+                        qlobal.ongoingReload = res;
+                        other.updateButtonStatus(ownId, res.status, qlobal, layout)
+                    },
+                    error: function (err) {
+                        console.error(err);
+                        other.updateButtonStatus(ownId, 'error', qlobal, layout)
+                    }
+                });
+            }
+
+        }
     }
 
 });

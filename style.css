@@ -17,16 +17,13 @@
   right: 0px;
 }
 
-.qfr-true {
+.qfr-reload-btn {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* margin-bottom: 4px; */
   padding: 0 5px;
-}
-
-.qfr-false {
-  display: none;
+  background: white;
+  font-weight: normal;
 }
 
 .qfr-dialog {
@@ -461,4 +458,41 @@
 #msg_parent_qfr-main .lui-dialog__footer {
   height: unset;
   text-align: center;
+}
+
+.qfr-reload-btn .lui-icon--reload,
+.qfr-wait {
+  animation-name: rotate;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  transform: rotate(1turn);
+  -webkit-animation-name: rotate;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+  -webkit-transform: rotate(1turn);
+}
+
+.qfr-reload-btn img {
+  height: 23px;
+  width: 23px;
+}
+
+.qfr-reloadhistory {
+  text-decoration: none;
+  color: rgb(64, 64, 64);
+}
+
+.qfr-reloadhistory .lui-icon--info {
+  background-image: linear-gradient(white 60%, transparent 40%);
+}
+
+.qfr-firsttime-warning {
+  margin-right: 22px;
+  text-align: right;
+}
+
+.qfr-firsttime-warning .lui-icon--warning-triangle {
+  color: rgb(203, 91, 91);
 }
