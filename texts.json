@@ -1,4 +1,5 @@
 {
+  "githubHelpPage": "https://github.com/ChristofSchwarz/db-ext-qloudfriend/blob/main/README.md",
   "btnHoverTextFriend": "click to open data/\\bridge qlikcloud actions.",
   "btnInfoHover": "Show app reload history and cancel a reload",
   "infoWrongStateOne": "sheet is not in desired publish-state. Check here!",
@@ -9,6 +10,8 @@
   "reloadTriggeredInfo": "Application reload triggered in the background, you can check the",
   "reloadTriggeredLink": "status here.",
   "appUpdated": "in space \"{{space}}\" has been successfully republished.",
+  "sourceData": "Copy data from this app to target app",
+  "targetData": "Do not change data of target app",
   "reloadMsg": {
     "ready": "Trigger a reload in the background for this app.",
     "QUEUED": "App is waiting to be reloaded.",

@@ -496,3 +496,25 @@
 .qfr-firsttime-warning .lui-icon--warning-triangle {
   color: rgb(203, 91, 91);
 }
+
+.qfr-openhelp {
+  text-decoration: none;
+  color: #888;
+  float: right;
+  margin: 0 7px;
+}
+
+.qfr-openhelp:hover {
+  color: #092d4d;
+}
+
+.qfr-close-msg {
+  float: right;
+  padding: 0 5px;
+  min-width: 20px;
+  height: unset;
+}
+
+.qfr-tbody-applist tr {
+  border-bottom: 2px solid transparent;
+}

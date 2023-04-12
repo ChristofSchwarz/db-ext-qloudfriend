@@ -10,7 +10,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
     // Initializing global object "qlobal"
     var qlobal = {
         qext: null,
-        title: 'Qloud Friend Extension',
+        title: `Qloud Friend Extension <span class="qfr-version">v{{version}}</span>`,
         sheetInfo: {},
         appInfo: null,
         spaceInfo: null,
@@ -33,7 +33,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
         async: false,  // wait for this call to finish.
         success: function (data) {
             qlobal.qext = data;
-            qlobal.title += ' <span class="qfr-version">v' + data.version + '</span>';
+            qlobal.title = qlobal.title.replace('{{version}}', data.version);
         }
     });
 
@@ -169,44 +169,42 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
                         animateIcon(ownId);
                         main.apiCtrl.rememberSessionInLocalStore(app.id);
                     }
-                }
 
-                // get qlobal.sheetInfo updated 
-
-                main.functions.getObjectSheetList(layout, qlobal).then(res => {
-                    if (res) {
-                        var sheetsWrong = main.functions.getWrongSheetsCount(qlobal);
-                        if (sheetsWrong == 0) {
-                            $(`.qfr-toolbar-button`).css('background-color', '').prop('title', qlobal.texts.btnHoverTextFriend);
-                        } else {
-                            const info = `${sheetsWrong} ${sheetsWrong > 1 ? qlobal.texts.infoWrongStateMany : qlobal.texts.infoWrongStateOne}`;
-                            $(`.qfr-toolbar-button`).css('background-color', 'rgb(203,91,91)').prop('title', info);
-                            if (createdButton1stTime) {
-                                // show warning about sheets that are published but shouldn't or 
-                                // that are private and shoud be public
-                                setTimeout(() => {
-                                    leonardo.msg('qfr-main', null,
-                                        `<div class="qfr-firsttime-warning"> 
+                    // get qlobal.sheetInfo updated 
+                    main.functions.getObjectSheetList(layout, qlobal).then(res => {
+                        if (res) {
+                            var sheetsWrong = main.functions.getWrongSheetsCount(qlobal);
+                            if (sheetsWrong == 0) {
+                                $(`.qfr-toolbar-button`).css('background-color', '').prop('title', qlobal.texts.btnHoverTextFriend);
+                            } else {
+                                const info = `${sheetsWrong} ${sheetsWrong > 1 ? qlobal.texts.infoWrongStateMany : qlobal.texts.infoWrongStateOne}`;
+                                $(`.qfr-toolbar-button`).css('background-color', 'rgb(203,91,91)').prop('title', info);
+                                if (createdButton1stTime) {
+                                    // show warning about sheets that are published but shouldn't or 
+                                    // that are private and shoud be public
+                                    setTimeout(() => {
+                                        leonardo.msg('qfr-main', null,
+                                            `<div class="qfr-firsttime-warning"> 
                                             <span class="lui-icon  lui-icon--warning-triangle"></span>
                                             ${info}
                                         </div>
                                         <img src="../extensions/db-ext-qloudfriend/pics/up-arrows.gif" 
                                             style="width:36px;position:absolute;top:0;right:0;" />`,
-                                        null, 'Close', null, null, 'right:0;top:0;left:unset;width:140px;');
-                                }, 1500);
+                                            null, 'Close', null, null, 'right:0;top:0;left:unset;width:140px;');
+                                    }, 1500);
+                                }
                             }
                         }
-                    }
-                });
-
+                    });
+                }
                 // Try to hide the background with css manipulation
                 try {
                     if (layout.pHideBackground) {
                         $(`#parent_${ownId}`).closest('article').css('border', 'unset');
                         $(`#parent_${ownId}`).closest('.qv-inner-object').css({ background: 'unset', padding: 'unset' });
                     } else {
-                        $(`#parent_${ownId}`).closest('article').css('border');
-                        $(`#parent_${ownId}`).closest('.qv-inner-object').css('background').css('padding');
+                        $(`#parent_${ownId}`).closest('article').css('border', '');
+                        $(`#parent_${ownId}`).closest('.qv-inner-object').css('background', '').css('padding', '');
                     }
                 }
                 catch (err) {

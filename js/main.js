@@ -1,21 +1,18 @@
 // Main qloudFriend window handler
 
-define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
-    (qlik, $, leonardo, windowHtml) {
+define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../texts.json"], function
+    (qlik, $, leonardo, windowHtml, textsLoader) {
 
-    if (!leonardo) console.warn('within mainWindow: leonardo object', leonardo);
+    const texts = JSON.parse(textsLoader);
+    // if (!leonardo) console.warn('within mainWindow: leonardo object', leonardo);
 
-    const markSelector = '.sheet-title-container';
-
-    const close_button = `
-        <button class="lui-button qfr-close-msg" style="float:right;padding: 0 5px;min-width: 20px;height: unset;">
+    const closeAndHelpButtons = `
+        <button class="lui-button qfr-close-msg">
             <span class="lui-icon  lui-icon--small  lui-icon--close"></span>
-        </button>`;
-
-    const texts = {
-        sourceData: 'Copy data from this app to target app',
-        targetData: 'Do not change data of target app'
-    }
+        </button>
+        <a class="qfr-openhelp" href="${texts.githubHelpPage}" target="_blank">
+            <span class="lui-icon lui-icon--help"></span>
+        </a>`;
 
     const dialogStyle = 'right:0;top:0;left:unset;width:540px;';
 
@@ -152,44 +149,49 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
 
             $(`#qfr-sheetTable-tbody`).empty();
             var sheetCount = 0;
-            for (const sheet in qlobal.sheetInfo) {
+            // work through the object keys in sortOrder 
+            // for (const sheet in qlobal.sheetInfo) {
+            $.map(qlobal.sheetInfo, (v, i) => { v.objId = i; return v })
+                .sort((p1, p2) => { return p1.sortOrder - p2.sortOrder }).forEach((thisSheet) => {
 
-                sheetCount++;
-                const thisSheet = qlobal.sheetInfo[sheet];
-                var tag = thisSheet.qloudfriendTag
+                    const sheetId = thisSheet.objId
+                    sheetCount++;
+                    // const thisSheet = qlobal.sheetInfo[sheet];
+                    var tag = thisSheet.qloudfriendTag
 
-                const isApprovedSheet = thisSheet.approved == true;
-                const isPublishedSheet = thisSheet.published == true;
+                    const isApprovedSheet = thisSheet.approved == true;
+                    const isApprovedApp = qlobal.appInfo.attributes ? qlobal.appInfo.attributes.published : false;
+                    const isPublishedSheet = thisSheet.published == true;
 
-                $(`#qfr-sheetTable-tbody`).append(`
-                <tr class="qfr-sheetTableRow" ` /* id="qfr_tr_${sheet}" */ + ` 
-                    sheet="${sheet}" tag="${tag}">
-                    <td class="qfr-col-currsheet">
-                        <span title="This is the current sheet" class="lui-icon  lui-icon--arrow-right  qfr-currSheetMarker"
-                            ${sheet == currSheetId ? '' : 'style="display:none;"'}></span>
-                    </td>
-                    <td class="qfr-col-rank">${thisSheet.sortOrder}</td>
-                    <td class="qfr-col-title">
-                        ${functions.getHtmlTitleTooltip(thisSheet.title)}
-                    </td>
-                    <td class="qfr-col-tag  qfr-tag-${tag}${isApprovedSheet ? '  qfr-semitransparent' : ''}">
-                        ${functions.getHtmlTagTooltip(tag, isApprovedSheet)}
-                    </td>
-                    <td class="qfr-col-published">
-                        <!--span class="qfr-cb-{bgIsRight}"-->
-                        <span>
-                        <input type="checkbox" class="qfr_cb_published" 
-                            ${isPublishedSheet ? ' checked' : ''}
-                            ${isApprovedSheet ? ' disabled' : ''}>
-                        </span>
-                    </td>
-                    <td class="qfr-col-approved">
-                        <input type="checkbox" disabled ${isApprovedSheet ? 'checked' : ''}>
-                    </td>
-                </tr>`);
+                    $(`#qfr-sheetTable-tbody`).append(`
+                    <tr class="qfr-sheetTableRow" ` /* id="qfr_tr_${sheetId}" */ + ` 
+                        sheet="${sheetId}" tag="${tag}">
+                        <td class="qfr-col-currsheet">
+                            <span title="This is the current sheet" class="lui-icon  lui-icon--arrow-right  qfr-currSheetMarker"
+                                ${sheetId == currSheetId ? '' : 'style="display:none;"'}></span>
+                        </td>
+                        <td class="qfr-col-rank">${thisSheet.sortOrder}</td>
+                        <td class="qfr-col-title">
+                            ${functions.getHtmlTitleTooltip(thisSheet.title)}
+                        </td>
+                        <td class="qfr-col-tag  qfr-tag-${tag}${isApprovedApp ? '  qfr-semitransparent' : ''}">
+                            ${functions.getHtmlTagTooltip(tag, isApprovedApp)}
+                        </td>
+                        <td class="qfr-col-published">
+                            <!--span class="qfr-cb-{bgIsRight}"-->
+                            <span>
+                            <input type="checkbox" class="qfr_cb_published" 
+                                ${isPublishedSheet ? ' checked' : ''}
+                                ${isApprovedApp ? ' disabled' : ''}>
+                            </span>
+                        </td>
+                        <td class="qfr-col-approved">
+                            <input type="checkbox" disabled ${isApprovedSheet ? 'checked' : ''}>
+                        </td>
+                    </tr>`);
 
-                functions.setClassRightWrong(sheet, tag, thisSheet.published);
-            }
+                    functions.setClassRightWrong(sheetId, tag, thisSheet.published);
+                });
 
             events.clickSheetName(); // opens tooltip1
             events.clickOpenTagMenu(); // opens tooltip2
@@ -469,6 +471,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                     $('#qfr-show-warnings').prop('checked'),
                     $('#qfr-show-own').prop('checked')
                 );
+                // $('.qfr-col-rank.qfr-th-sort').click() // trigger sort by rank
             });
         },
 
@@ -763,7 +766,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
         publishApp: function (app, qlobal, htmlSpaceIconManaged) {
 
             var httpHeaders = apiCtrl.getCloudHttpHeaders();
-            $(`#qfr-tbody-applist`).empty();
+            $(`.qfr-tbody-applist`).empty();
 
             for (const childApp of qlobal.childApps) {
 
@@ -788,7 +791,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                     success: function (res) { space = res; }
                 });
 
-                $(`#qfr-tbody-applist`).append(
+                $(`.qfr-tbody-applist`).append(
                     `<tr>
                         <td style="vertical-align:bottom;">${htmlSpaceIconManaged}</td>
                         <td><a href="/explore/spaces/${space.id}" target="_blank">${space.name}</a></td>
@@ -799,7 +802,6 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
 
                 $(`#publ_${childApp.resourceId}`).click(() => {
                     $(`#publ_${childApp.resourceId}`).attr('disabled', true);
-
                     $.ajax({
                         url: `/api/v1/apps/${app.id}/publish`,
                         // dataType: 'json',
@@ -812,15 +814,32 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                         }),
                         async: false,  // wait for this call to finish.
                         success: function (res) {
-                            leonardo.msg('qfr-main', qlobal.title,
-                                `<div class="lui-text-success">
-                                    <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
-                                    Success
-                                </div>
-                                <div><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a> 
-                                    ${qlobal.texts.appUpdated.replace('{{space}}', space.name)}
-                                </div>`,
-                                null, 'Close');
+                            // change the app title back to what it was before ... 
+                            $.ajax({
+                                url: `/api/v1/apps/${childApp.resourceId}`,
+                                // dataType: 'json',
+                                method: 'PUT',
+                                contentType: "application/json",
+                                headers: httpHeaders,
+                                data: JSON.stringify({
+                                    attributes: { name: childApp.name }
+                                }),
+                                async: false,  // wait for this call to finish.
+                                success: function (res) {
+                                    leonardo.msg('qfr-main', qlobal.title,
+                                        `<div class="lui-text-success">
+                                       <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
+                                       Success
+                                   </div>
+                                   <div><a href="/sense/app/${childApp.resourceId}" target="_blank">${childApp.name}</a> 
+                                       ${qlobal.texts.appUpdated.replace('{{space}}', space.name)}
+                                   </div>`,
+                                        null, 'Close');
+                                },
+                                error: function (err) {
+                                    other.showApiError(err);
+                                }
+                            });
                         },
                         error: function (err) {
                             other.showApiError(err);
@@ -1070,7 +1089,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html"], function
                 .replace(new RegExp('{{texts.targetData}}', 'g'), texts.targetData)
 
             // Render the main window
-            leonardo.msg('qfr-main', qlobal.title + close_button, html,
+            leonardo.msg('qfr-main', qlobal.title + closeAndHelpButtons, html,
                 null, /*'Cancel'*/ null, null, null, dialogStyle
             );
 
