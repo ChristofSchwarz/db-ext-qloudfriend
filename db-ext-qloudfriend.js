@@ -41,22 +41,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
     $("<style>").html(cssContent).appendTo("head");
 
     return {
-        initialProperties: {
-            showTitles: true,
-            title: "",
-            subtitle: "",
-            footnote: {
-                qStringExpression: {
-                    qExpr:
-                        `'Reload ' & If((Now()-ReloadTime()) > 1, Num(Now()-ReloadTime(),'0.0') & ' d ago',
-                        If((Now()-ReloadTime()) < 1/24, Num((Now()-ReloadTime())*24*60, '0') & ' m ago',
-                        Interval((Now()-ReloadTime()), 'hh:mm') & ' h ago'))`
-                }
-            },
-            disableNavMenu: true,
-            pTxtColor1: { index: -1, color: '#222222' },
-            pBgColor1: { index: -1, color: '#fefefe' }
-        },
+        initialProperties: props.initialProperties(),
 
         definition: {
             type: "items",
@@ -71,11 +56,11 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
 
         paint: function ($element, layout) {
 
-            var self = this;
+            // var self = this;
             const ownId = layout.qInfo.qId;
-            console.log('QloudFriend ' + ownId + ' paint method.');
-            console.log('layout:', layout);
-            console.log('qlobal ongoingReload', JSON.stringify(qlobal.ongoingReload));
+            // console.log('QloudFriend ' + ownId + ' paint method.');
+            // console.log('layout:', layout);
+            // console.log('qlobal ongoingReload', JSON.stringify(qlobal.ongoingReload));
 
             var app = qlik.currApp();
             var mode = qlik.navigation.getMode();
@@ -93,7 +78,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
                 const txtColor1 = layout.pTxtColor1 == undefined ? '#222222' : (layout.pTxtColor1.color || layout.pTxtColor1);
 
                 html = `
-                    <div id="parent_${ownId}">
+                    <div id="parent_${ownId}" style="text-align:${layout.pAlign || 'left'};">
                         <span class="qfr-wait  lui-icon  lui-icon--large  lui-icon--sync"></span>
                         <button class="qfr-db-button-on-sheet  lui-button" 
                             title="${qlobal.texts.btnHoverTextFriend}" 
@@ -115,10 +100,12 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
                 if ($(`#parent_${ownId}`).length == 0) {
                     $element.html(html);
                     // register click event of Reload button
-                    $("#reload_" + ownId).on("click", function () {
+                    $("#reload_" + ownId).click(function () {
                         main.apiCtrl.reloadApp(ownId, app, qlobal);
                         main.other.updateButtonStatus(ownId, "QUEUED", qlobal, layout);
                     });
+                } else {
+                    $(`#parent_${ownId}`).css('text-align', layout.pAlign || 'left')
                 }
 
                 // make some Cloud API calls to find out all about this app, store into qlobal object
@@ -151,25 +138,26 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
                 $('.qfr-toolbar-button').remove();
 
                 if (qlobal.showFriend) {
+                    if ($('.qfr-toolbar-button').length == 0) {
+                        const sel = '[data-testid="qs-sub-toolbar__right"]';
+                        const classes = $(`${sel} button:last`).attr('class'); // get the classes of the existing button in DOM
+                        $(sel).append(`<button class="${classes} qfr-toolbar-button" 
+                            title="${qlobal.texts.btnHoverTextFriend}" 
+                            style="${createdButton1stTime ? 'width:0;' : ''}"> 
+                            <span class="databridge_logo"></span>
+                        </button>`);
+                        $('.qfr-toolbar-button, .qfr-db-button-on-sheet').click(function () {
+                            console.log('qloudfriend layout:', layout);
+                            console.log('qloudfriend qlobal:', qlobal);
+                            main.open(layout, qlobal);
+                        })
 
-                    const sel = '[data-testid="qs-sub-toolbar__right"]';
-                    const classes = $(`${sel} button:last`).attr('class'); // get the classes of the existing button in DOM
-                    $(sel).append(`<button class="${classes} qfr-toolbar-button" 
-                        title="${qlobal.texts.btnHoverTextFriend}" 
-                        style="${createdButton1stTime ? 'width:0;' : ''}"> 
-                        <span class="databridge_logo"></span>
-                    </button>`);
-                    $('.qfr-toolbar-button, .qfr-db-button-on-sheet').click(function () {
-                        main.open(layout, qlobal);
-                    })
-
-
-                    if (createdButton1stTime) {
-                        // animate that the button is created on top panel
-                        animateIcon(ownId);
-                        main.apiCtrl.rememberSessionInLocalStore(app.id);
+                        if (createdButton1stTime) {
+                            // animate that the button is created on top panel
+                            animateIcon(ownId);
+                            main.apiCtrl.rememberSessionInLocalStore(app.id);
+                        }
                     }
-
                     // get qlobal.sheetInfo updated 
                     main.functions.getObjectSheetList(layout, qlobal).then(res => {
                         if (res) {
@@ -196,34 +184,33 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
                             }
                         }
                     });
+                } else {
+                    $('.qfr-toolbar-button').remove();
                 }
                 // Try to hide the background with css manipulation
-                try {
-                    if (layout.pHideBackground) {
-                        $(`#parent_${ownId}`).closest('article').css('border', 'unset');
-                        $(`#parent_${ownId}`).closest('.qv-inner-object').css({ background: 'unset', padding: 'unset' });
-                    } else {
-                        $(`#parent_${ownId}`).closest('article').css('border', '');
-                        $(`#parent_${ownId}`).closest('.qv-inner-object').css('background', '').css('padding', '');
-                    }
-                }
-                catch (err) {
-                    console.warn("qloudfriend hiding background CSS didn't Work");
+
+                if (layout.pHideBackground) {
+                    $(`#parent_${ownId}`).closest('article').css('border', 'unset');
+                    $(`#parent_${ownId}`).closest('.qv-inner-object').css({ background: 'unset', padding: 'unset' });
+                } else {
+                    $(`#parent_${ownId}`).closest('article').css('border', '');
+                    $(`#parent_${ownId}`).closest('.qv-inner-object').css({ background: '', padding: '' });
                 }
 
+                // register interval
+                if (qlobal.setIntervalFor.length == 0) {
+                    // the first interval to register
+                    qlobal.setIntervalFor.push(ownId);
+                    setInterval(() => {
+                        qlobal.setIntervalFor.forEach((objectId) => {
+                            if ($(`#parent_${objectId}`).length) main.intervalHandler(objectId, layout, qlobal)
+                        })
+                    }, 5000);
+                } else if (qlobal.setIntervalFor.indexOf(ownId) == -1) {
+                    qlobal.setIntervalFor.push(ownId)
+                }
             }
-            // register interval
-            if (qlobal.setIntervalFor.length == 0) {
-                // the first interval to register
-                qlobal.setIntervalFor.push(ownId);
-                setInterval(() => {
-                    qlobal.setIntervalFor.forEach((objectId) => {
-                        if ($(`#parent_${objectId}`).length) main.intervalHandler(objectId, layout, qlobal)
-                    })
-                }, 5000);
-            } else if (qlobal.setIntervalFor.indexOf(ownId) == -1) {
-                qlobal.setIntervalFor.push(ownId)
-            }
+
             return qlik.Promise.resolve();
         }
     };

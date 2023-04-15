@@ -5,25 +5,44 @@ define(["qlik", "jquery"], function
 
     return {
 
+        initialProperties: function () {
+            return {
+                showTitles: true,
+                title: "",
+                subtitle: "",
+                footnote: {
+                    qStringExpression: {
+                        qExpr:
+                            `'Reload ' & If((Now()-ReloadTime()) > 1, Num(Now()-ReloadTime(),'0.0') & ' d ago',
+                            If((Now()-ReloadTime()) < 1/24, Num((Now()-ReloadTime())*24*60, '0') & ' m ago',
+                            Interval((Now()-ReloadTime()), 'hh:mm') & ' h ago'))`
+                    }
+                },
+                disableNavMenu: true,
+                pTxtColor1: { index: -1, color: '#222222' },
+                pBgColor1: { index: -1, color: '#fefefe' }
+            }
+        },
+
         items: function (qext) {
             const app = qlik.currApp();
             const enigma = app.model.enigmaModel;
             return [
                 {
                     uses: "settings"
-                },
-                // {
-                //     uses: "addons",
-                //     items: [
-                //         {
-                //             uses: "dataHandling",
-                //             items: [
-                //                 { uses: "calcCond" }
-                //             ]
-                //         }
-                //     ]
-                // },
-                {
+                }, {
+                    uses: "addons",
+                    items: {
+                        dataHandling: {
+                            uses: "dataHandling",
+                            items: {
+                                calcCond: {
+                                    uses: "calcCond"
+                                }
+                            }
+                        }
+                    }
+                }, {
                     label: 'Extension Settings',
                     type: 'items',
                     component: 'expandable-items',
@@ -100,6 +119,33 @@ define(["qlik", "jquery"], function
                     type: 'boolean',
                     ref: 'pHideBackground',
                     defaultValue: false
+                }, {
+                    label: 'Alignment',
+                    type: 'string',
+                    component: 'item-selection-list',
+                    icon: true,
+                    horizontal: true,
+                    ref: 'pAlign',
+                    defaultValue: 'left',
+                    items: [{
+                        component: "icon-item",
+                        icon: "align_left",
+                        labelPlacement: "bottom",
+                        value: "left",
+                        translation: "properties.dock.left"
+                    }, {
+                        component: "icon-item",
+                        icon: "align_center",
+                        labelPlacement: "bottom",
+                        value: "center",
+                        translation: "Common.Center"
+                    }, {
+                        component: "icon-item",
+                        icon: "align_right",
+                        labelPlacement: "bottom",
+                        value: "right",
+                        translation: "properties.dock.right"
+                    }]
                 }
             ]
         }
@@ -128,14 +174,14 @@ define(["qlik", "jquery"], function
                 label: "About Us",
                 component: "link",
                 url: 'https://www.databridge.ch'
-            } /*,
-                docu: {
-                    label: "Open Documentation",
-                    component: "button",
-                    action: function (arg) {
-                        window.open('https://github.com/ChristofSchwarz/qs_ext_reloadreplace', '_blank');
-                    }
-                } */
+            },
+            docu: {
+                label: "Open Documentation",
+                component: "button",
+                action: function (arg) {
+                    window.open('https://github.com/ChristofSchwarz/db-ext-qloudfriend/blob/main/README.md', '_blank');
+                }
+            }
         }
     }
 

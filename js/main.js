@@ -593,7 +593,9 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                     headers: httpHeaders,
                     async: false,  // wait for this call to finish.
                     success: function (res) { qlobal.userInfo = res; },
-                    error: function (err) { other.showApiError(err); reject(err); }
+                    error: function (err) {
+                        other.showApiError(err); reject(err);
+                    }
                 });
 
                 $.ajax({
@@ -603,7 +605,9 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                     headers: httpHeaders,
                     async: false,  // wait for this call to finish.
                     success: function (res) { qlobal.appInfo = res; },
-                    error: function (err) { other.showApiError(err); reject(err); }
+                    error: function (err) {
+                        other.showApiError(err); reject(err);
+                    }
                 });
 
                 $.ajax({
@@ -617,7 +621,9 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                         var thisApp = res.data.filter(e => e.resourceAttributes.id == app.id);
                         qlobal.itemInfo = thisApp[0];
                     },
-                    error: function (err) { other.showApiError(err); reject(err); }
+                    error: function (err) {
+                        other.showApiError(err); reject(err);
+                    }
                 });
                 // console.log('this app', getHtmlAppInfo);
 
@@ -628,7 +634,9 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                     headers: httpHeaders,
                     async: false,  // wait for this call to finish.
                     success: function (res) { qlobal.ownerInfo = res; },
-                    error: function (err) { other.showApiError(err); reject(err); }
+                    error: function (err) {
+                        other.showApiError(err); reject(err);
+                    }
                 });
                 // console.log('Owner of app', ownerInfo);
 
@@ -640,7 +648,9 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                         headers: httpHeaders,
                         async: false,  // wait for this call to finish.
                         success: function (res) { qlobal.spaceInfo = res; },
-                        error: function (err) { other.showApiError(err); reject(err); }
+                        error: function (err) {
+                            other.showApiError(err); reject(err);
+                        }
                     })
                 } else {
                     qlobal.spaceInfo = null;
@@ -649,7 +659,8 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                 qlobal.childApps = [];
                 var loop = 0;
                 var url = `/api/v1/items?resourceType=app&limit=99`;
-                while (url) {
+                var errorQuit = false
+                while (url && !errorQuit) {
                     loop++;
                     $.ajax({
                         url: url,
@@ -663,16 +674,21 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                             });
                             qlobal.childApps.push(...filteredApps);
                             url = res.links.next ? res.links.next.href : false;
+                        },
+                        error: function (err) {
+                            console.error(err);
+                            errorQuit = true;
                         }
                     })
                 }
 
-                var loop = 0;
-                var url = `/api/v1/reloads?&appId=${app.id}&limit=99`;
-                while (url) {
-                    loop++;
+                var loop2 = 0;
+                var url2 = `/api/v1/reloads?&appId=${app.id}&limit=99`;
+                var errorQuit2 = false
+                while (url2 && !errorQuit2) {
+                    loop2++;
                     $.ajax({
-                        url: url,
+                        url: url2,
                         dataType: 'json',
                         method: 'GET',
                         headers: httpHeaders,
@@ -685,10 +701,14 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                             if (incompleteReloads.length > 0) {
                                 qlobal.ongoingReload = incompleteReloads[0];
                                 other.updateButtonStatus(ownId, incompleteReloads[0].status, qlobal, layout);
-                                url = false
+                                url2 = false
                             } else {
-                                url = res.links.next ? res.links.next.href : false;
+                                url2 = res.links.next ? res.links.next.href : false;
                             }
+                        },
+                        error: function (err) {
+                            console.error(err);
+                            errorQuit2 = true;
                         }
                     })
                 }
@@ -987,7 +1007,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
 
         showApiError: function (err) {
             console.error(err);
-            leonardo.msg('qfr-error', `<span class="lui-icon  lui-icon--warning"></span> Error ${err.status}`,
+            leonardo.msg('qfr-error', `Error ${err.status}`,
                 `<div>
             ${err.responseJSON ?
                     (err.responseJSON.errors ? JSON.stringify(err.responseJSON.errors[0]) : err.responseText)
