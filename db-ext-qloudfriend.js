@@ -49,10 +49,10 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
             items: props.items(qlobal.qext)
         },
 
-        // resize: function ($element, layout) {
-        //     // nothing to do when only resized
-        //     return qlik.Promise.resolve();
-        // },
+        resize: function ($element, layout) {
+            //     // nothing to do when only resized
+            return qlik.Promise.resolve();
+        },
 
         paint: function ($element, layout) {
 
@@ -64,6 +64,7 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
 
             var app = qlik.currApp();
             var mode = qlik.navigation.getMode();
+            //console.log('paint qloudfriend mode ', mode);
             const currSheet = qlik.navigation.getCurrentSheetId().sheetId;
 
             var html = '';
@@ -122,7 +123,9 @@ define(["qlik", "jquery", "text!./style.css", "./js/props", "./js/main",
 
                 // update visibilty of Reload button
                 if (layout.pUseReloadBtn) {
-                    if (qlobal.ongoingReload) main.other.updateButtonStatus(ownId, qlobal.ongoingReload.status, qlobal, layout);
+                    if (qlobal.ongoingReload) {
+                        main.other.updateButtonStatus(ownId, qlobal.ongoingReload.status, qlobal, layout);
+                    }
                     $(`#reload_${ownId}`).show().css({ "background-color": bgColor1, color: txtColor1 });
                 } else {
                     $(`#reload_${ownId}`).hide();

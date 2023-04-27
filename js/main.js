@@ -1134,6 +1134,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
 
             // Add "publish app" action button
             if (qlobal.childApps.length > 0) {
+                $("#qfr-btn-publish-app").remove();
                 $(`#msg_parent_qfr-main .lui-dialog__footer`).append(
                     `<button class="lui-button" id="qfr-btn-publish-app">
                     <span class="lui-icon  lui-icon--map"></span>
@@ -1146,6 +1147,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
 
             // Add Reload button
             if (layout.pUseReloadBtn) {
+                $("#qfr-btn-reload2").remove();
                 $(`#msg_parent_qfr-main .lui-dialog__footer`).append(
                     `<button class="lui-button" id="qfr-btn-reload2">
                         <span class="lui-icon  lui-icon--reload"></span>
@@ -1157,6 +1159,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
 
             // Add "Make me owner"
             if (qlobal.userInfo.id != qlobal.ownerInfo.id) {
+                $("#qfr-btn-chgowner").remove();
                 $(`#msg_parent_qfr-main .lui-dialog__footer`).append(
                     `<button class="lui-button" id="qfr-btn-chgowner">
                         <span class="lui-icon  lui-icon--person"></span>
@@ -1166,6 +1169,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                 events.clickButtonChgOwner(qlobal);
             }
             // Add Unpublish Sheet button
+            $("#qfr-btn-unpublish-sheet").remove();
             $(`#msg_parent_qfr-main .lui-dialog__footer`).append(
                 `<button class="lui-button" id="qfr-btn-unpublish-sheet" style="display:none;">
                     <span class="lui-icon  lui-icon--export"></span> 
@@ -1175,6 +1179,7 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
             events.clickButtonUnpublishSheet(qlobal, currSheetId);
 
             // Add Publish Sheet button
+            $("#qfr-btn-publish-sheet").remove();
             $(`#msg_parent_qfr-main .lui-dialog__footer`).append(
                 `<button class="lui-button" id="qfr-btn-publish-sheet" style="display:none;">
                     <span class="lui-icon  lui-icon--upload"></span>
