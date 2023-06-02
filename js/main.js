@@ -773,7 +773,9 @@ define(["qlik", "jquery", "./leonardo", "text!../html/window.html", "text!../tex
                         `<div class="lui-text-success" style="float:left;margin-right:8px;">
                             <span class="lui-icon  lui-icon--large  lui-icon--tick"></span>
                         </div>
-                        <div class="lui-text">${qlobal.texts.appOwnerChanged}
+                        <div class="lui-text">
+                            ${qlobal.texts.appOwnerChanged}
+                            <a href="${location.href.replace('/sense/app', '/dataloadeditor/app')}">Script Editor</a>
                         </div>`
                         , null, 'Close', null);
                 },

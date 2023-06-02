@@ -6,7 +6,7 @@
   "infoWrongStateMany": "sheets are not in desired publish-state. Check here!",
   "questionTakeAway1": "Do you really want to take ownership away from",
   "questionTakeAway2": "Note that he/she may lose access to some parts of the app such as the Load Script Editor.",
-  "appOwnerChanged": "App owner changed to you.",
+  "appOwnerChanged": "App owner changed to you. Maybe you want to go to",
   "reloadTriggeredInfo": "Application reload triggered in the background, you can check the",
   "reloadTriggeredLink": "status here.",
   "appUpdated": "in space \"{{space}}\" has been successfully republished.",
